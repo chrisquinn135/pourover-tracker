@@ -155,7 +155,8 @@
 		<div class="mt-6 space-y-3">
 			{#if matches.length === 0}
 				<div class="panel p-6 text-[var(--muted)]">
-					No comparable bags yet. Add more beans with roast level and overlapping fields.
+					No comparable bags yet. Closest match needs roast level on both this bag and your
+					saved bags, plus at least one overlapping field.
 				</div>
 			{:else}
 				{#each matches as match, index}
