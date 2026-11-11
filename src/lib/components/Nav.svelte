@@ -10,17 +10,20 @@
 	];
 </script>
 
-<header class="mb-8 animate-fade">
+<header class="mb-8 w-full min-w-0 animate-fade">
 	<a href="/" class="display mb-5 block text-3xl font-bold text-[var(--ink)] md:text-4xl">
 		Pourover tracker
 	</a>
 
-	<nav class="flex flex-wrap gap-2">
+	<nav
+		class="grid w-full min-w-0 grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5"
+		aria-label="Primary"
+	>
 		{#each links as link}
 			{@const active = page.url.pathname === link.href}
 			<a
 				href={link.href}
-				class="btn px-3 py-2 text-sm whitespace-nowrap sm:px-[1.15rem] sm:py-[0.7rem] sm:text-base {active
+				class="btn w-full justify-center px-3 py-2 text-center text-sm {active
 					? 'btn-primary'
 					: 'btn-ghost'}"
 				aria-current={active ? 'page' : undefined}
