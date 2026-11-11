@@ -1,64 +1,100 @@
 <script lang="ts">
-	const actions = [
-		{
-			href: '/logs/new',
-			title: 'Add a log',
-			body: 'Capture water temp, grind, dripper, time, and rating after each brew.'
-		},
-		{
-			href: '/beans/new',
-			title: 'Add a bean',
-			body: 'Register a new bag with origin, roast, process, and tasting notes.'
-		},
-		{
-			href: '/logs',
-			title: 'View history',
-			body: 'Browse every pour, or filter down to one bag’s recipes.'
-		},
-		{
-			href: '/beans',
-			title: 'Bags list',
-			body: 'See in-progress and finished bags, ranked by how they scored.'
-		},
-		{
-			href: '/closest',
-			title: 'Find closest bean',
-			body: 'Match a new bag to similar ones for a smarter first recipe.'
+	import { goto } from '$app/navigation';
+	import SampleBanner from '#lib/components/SampleBanner.svelte';
+	import EmptyState from '#lib/components/EmptyState.svelte';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
+
+	function onFilterChange(event: Event) {
+		const value = (event.currentTarget as HTMLSelectElement).value;
+		const qs = value ? `?beanId=${encodeURIComponent(value)}` : '';
+		goto(`/${qs}`);
+	}
+
+	function formatWhen(iso: string) {
+		try {
+			return new Intl.DateTimeFormat('en-US', {
+				dateStyle: 'medium',
+				timeStyle: 'short',
+				timeZone: 'America/Los_Angeles'
+			}).format(new Date(iso));
+		} catch {
+			return iso;
 		}
-	];
+	}
 </script>
 
 <section class="animate-rise">
-	<div class="panel overflow-hidden">
-		<div
-			class="relative px-6 py-10 md:px-10 md:py-14"
-			style="background:
-				linear-gradient(135deg, rgba(31,107,86,0.12), transparent 45%),
-				linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.2));"
-		>
-			<p class="text-sm font-semibold tracking-[0.16em] text-[var(--accent-deep)] uppercase">
-				Brew journal
-			</p>
-			<h1 class="display mt-3 max-w-xl text-4xl font-bold md:text-5xl">
-				Track every pourover with a clear starting point for the next bag.
-			</h1>
-			<p class="mt-4 max-w-lg text-base text-[var(--muted)] md:text-lg">
-				Logs live beside bean profiles. When a new bag lands, closest-match scoring points you at
-				a recipe that already worked.
-			</p>
-			<div class="mt-7 flex flex-wrap gap-3">
-				<a class="btn btn-primary" href="/logs/new">Log today’s brew</a>
-				<a class="btn btn-ghost" href="/closest">Find a similar bag</a>
-			</div>
+	<div class="mb-5 flex flex-wrap items-end justify-between gap-4">
+		<div>
+			<h1 class="display text-3xl font-bold">Feed</h1>
+			<p class="mt-1 text-[var(--muted)]">Every pour, newest first.</p>
+		</div>
+		<a class="btn btn-primary" href="/logs/new">Add log</a>
+	</div>
+
+	<SampleBanner show={data.usingMockData} />
+
+	<div class="panel mb-5 p-4">
+		<div class="field max-w-sm">
+			<label for="beanFilter">Bag</label>
+			<select id="beanFilter" value={data.beanId} onchange={onFilterChange}>
+				<option value="">All bags</option>
+				{#each data.beans as bean}
+					<option value={bean.id}>{bean.bagName}</option>
+				{/each}
+			</select>
 		</div>
 	</div>
 
-	<div class="stagger mt-6 grid gap-4 md:grid-cols-2">
-		{#each actions as action}
-			<a class="panel block p-5 transition hover:-translate-y-0.5" href={action.href}>
-				<h2 class="display text-xl font-semibold">{action.title}</h2>
-				<p class="mt-2 text-sm text-[var(--muted)]">{action.body}</p>
-			</a>
-		{/each}
-	</div>
+	{#if data.logs.length === 0}
+		<EmptyState
+			title="No brews yet"
+			body="Log your first pourover to start building your feed."
+			href="/logs/new"
+			cta="Add a log"
+		/>
+	{:else}
+		<div class="stagger space-y-3">
+			{#each data.logs as log}
+				<article class="panel p-5">
+					<div class="flex flex-wrap items-start justify-between gap-3">
+						<div>
+							<h2 class="display text-xl font-semibold">{log.beanName}</h2>
+							<p class="mt-1 text-sm text-[var(--muted)]">{formatWhen(log.brewedAt)} PT</p>
+						</div>
+						{#if log.rating !== null}
+							<span class="badge badge-progress">{log.rating}/10</span>
+						{/if}
+					</div>
+					<dl class="mt-4 grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
+						<div>
+							<dt class="text-[var(--muted)]">Temp</dt>
+							<dd class="font-medium">{log.waterTemp || '—'}°F</dd>
+						</div>
+						<div>
+							<dt class="text-[var(--muted)]">Grind</dt>
+							<dd class="font-medium">{log.grindSize || '—'}</dd>
+						</div>
+						<div>
+							<dt class="text-[var(--muted)]">Grinder</dt>
+							<dd class="font-medium">{log.grinder || '—'}</dd>
+						</div>
+						<div>
+							<dt class="text-[var(--muted)]">Dripper</dt>
+							<dd class="font-medium">{log.dripper || '—'}</dd>
+						</div>
+						<div>
+							<dt class="text-[var(--muted)]">Time</dt>
+							<dd class="font-medium">{log.totalTime || '—'}</dd>
+						</div>
+					</dl>
+					{#if log.notes}
+						<p class="mt-4 text-sm leading-relaxed text-[var(--ink)]">{log.notes}</p>
+					{/if}
+				</article>
+			{/each}
+		</div>
+	{/if}
 </section>

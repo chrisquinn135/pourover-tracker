@@ -56,7 +56,7 @@
 				const payload = await res.json().catch(() => ({}));
 				throw new Error(payload.message || 'Could not save log');
 			}
-			await goto(`/logs?beanId=${encodeURIComponent(beanId)}`);
+			await goto(`/?beanId=${encodeURIComponent(beanId)}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Could not save log';
 		} finally {

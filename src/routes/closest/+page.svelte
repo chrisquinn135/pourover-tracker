@@ -191,7 +191,7 @@
 							{/each}
 						</ul>
 						<div class="mt-4">
-							<a class="btn btn-ghost" href={`/logs?beanId=${match.bean.id}`}>Open brew history</a>
+							<a class="btn btn-ghost" href={`/?beanId=${match.bean.id}`}>Open in feed</a>
 						</div>
 					</article>
 				{/each}

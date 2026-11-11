@@ -2,10 +2,9 @@
 	import { page } from '$app/state';
 
 	const links = [
-		{ href: '/', label: 'Home' },
+		{ href: '/', label: 'Feed' },
 		{ href: '/logs/new', label: 'Add log' },
 		{ href: '/beans/new', label: 'Add bean' },
-		{ href: '/logs', label: 'History' },
 		{ href: '/beans', label: 'Bags' },
 		{ href: '/closest', label: 'Closest' }
 	];

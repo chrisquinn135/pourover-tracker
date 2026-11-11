@@ -69,7 +69,7 @@
 									<p class="mt-3 text-sm">{bean.notes}</p>
 								{/if}
 								<div class="mt-4 flex flex-wrap gap-2">
-									<a class="btn btn-ghost" href={`/logs?beanId=${bean.id}`}>View logs</a>
+									<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
 									<a class="btn btn-ghost" href={`/logs/new`}>Log a brew</a>
 									<button class="btn btn-ghost" type="button" onclick={() => markFinished(bean)}>
 										Mark finished
@@ -103,7 +103,7 @@
 									<p class="mt-3 text-sm">{bean.notes}</p>
 								{/if}
 								<div class="mt-4">
-									<a class="btn btn-ghost" href={`/logs?beanId=${bean.id}`}>View logs</a>
+									<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
 								</div>
 							</article>
 						{/each}
