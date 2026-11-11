@@ -26,7 +26,9 @@
 <svelte:window onkeydown={onKeydown} />
 
 {#if open}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div class="modal-backdrop animate-fade" role="presentation" onclick={() => !busy && oncancel()}>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="modal-panel animate-rise"
 			role="dialog"
