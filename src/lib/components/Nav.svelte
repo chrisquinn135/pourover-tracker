@@ -11,19 +11,9 @@
 </script>
 
 <header class="mb-8 animate-fade">
-	<div class="mb-5 flex flex-wrap items-end justify-between gap-4">
-		<div>
-			<p class="text-xs font-semibold tracking-[0.18em] text-[var(--muted)] uppercase">
-				Daily brew desk
-			</p>
-			<a href="/" class="display mt-1 block text-3xl font-bold text-[var(--ink)] md:text-4xl">
-				Pourover
-			</a>
-		</div>
-		<p class="max-w-xs text-sm text-[var(--muted)]">
-			Log cups, track bags, and find a starting recipe from similar beans.
-		</p>
-	</div>
+	<a href="/" class="display mb-5 block text-3xl font-bold text-[var(--ink)] md:text-4xl">
+		Pourover tracker
+	</a>
 
 	<nav class="flex gap-2 overflow-x-auto pb-1">
 		{#each links as link}

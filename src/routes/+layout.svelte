@@ -9,7 +9,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>Pourover</title>
+	<title>Pourover tracker</title>
 	<meta name="description" content="Track pourover brews and bean bags with Google Sheets." />
 </svelte:head>
 
