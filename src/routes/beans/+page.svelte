@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
+	import NotesEditor from '#lib/components/NotesEditor.svelte';
 	import type { Bean } from '#lib/types';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+	let savingId = $state<string | null>(null);
 
 	async function markFinished(bean: Bean) {
 		const rankingRaw = prompt(`Rank ${bean.bagName} out of 10`, bean.ranking?.toString() ?? '8');
@@ -23,7 +26,22 @@
 			alert('Could not update bag');
 			return;
 		}
-		location.reload();
+		await invalidateAll();
+	}
+
+	async function saveBeanNotes(id: string, notes: string) {
+		savingId = id;
+		try {
+			const res = await fetch(`/api/beans/${id}`, {
+				method: 'PATCH',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ notes })
+			});
+			if (!res.ok) throw new Error('Could not save notes');
+			await invalidateAll();
+		} finally {
+			savingId = null;
+		}
 	}
 </script>
 
@@ -65,9 +83,11 @@
 									</div>
 									<span class="badge badge-progress">In progress</span>
 								</div>
-								{#if bean.notes}
-									<p class="mt-3 text-sm">{bean.notes}</p>
-								{/if}
+								<NotesEditor
+									notes={bean.notes}
+									saving={savingId === bean.id}
+									onsave={(notes) => saveBeanNotes(bean.id, notes)}
+								/>
 								<div class="mt-4 flex flex-wrap gap-2">
 									<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
 									<a class="btn btn-ghost" href={`/logs/new`}>Log a brew</a>
@@ -99,9 +119,11 @@
 									</div>
 									<span class="badge badge-finished">{bean.ranking ?? '—'}/10</span>
 								</div>
-								{#if bean.notes}
-									<p class="mt-3 text-sm">{bean.notes}</p>
-								{/if}
+								<NotesEditor
+									notes={bean.notes}
+									saving={savingId === bean.id}
+									onsave={(notes) => saveBeanNotes(bean.id, notes)}
+								/>
 								<div class="mt-4">
 									<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
 								</div>

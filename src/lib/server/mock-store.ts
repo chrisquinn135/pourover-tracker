@@ -223,5 +223,20 @@ export const mockDb = {
 		};
 		store().logs.unshift(log);
 		return log;
+	},
+
+	async updateLog(id: string, patch: Partial<BrewLogInput>): Promise<BrewLog | null> {
+		const idx = store().logs.findIndex((l) => l.id === id);
+		if (idx < 0) return null;
+		const current = store().logs[idx];
+		const next: BrewLog = {
+			...current,
+			...patch,
+			id: current.id,
+			beanId: patch.beanId ?? current.beanId,
+			brewedAt: current.brewedAt
+		};
+		store().logs[idx] = next;
+		return next;
 	}
 };

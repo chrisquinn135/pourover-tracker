@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
+	import NotesEditor from '#lib/components/NotesEditor.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+	let savingId = $state<string | null>(null);
 
 	function onFilterChange(event: Event) {
 		const value = (event.currentTarget as HTMLSelectElement).value;
@@ -21,6 +23,21 @@
 			}).format(new Date(iso));
 		} catch {
 			return iso;
+		}
+	}
+
+	async function saveLogNotes(id: string, notes: string) {
+		savingId = id;
+		try {
+			const res = await fetch(`/api/logs/${id}`, {
+				method: 'PATCH',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ notes })
+			});
+			if (!res.ok) throw new Error('Could not save notes');
+			await invalidateAll();
+		} finally {
+			savingId = null;
 		}
 	}
 </script>
@@ -90,9 +107,11 @@
 							<dd class="font-medium">{log.totalTime || '—'}</dd>
 						</div>
 					</dl>
-					{#if log.notes}
-						<p class="mt-4 text-sm leading-relaxed text-[var(--ink)]">{log.notes}</p>
-					{/if}
+					<NotesEditor
+						notes={log.notes}
+						saving={savingId === log.id}
+						onsave={(notes) => saveLogNotes(log.id, notes)}
+					/>
 				</article>
 			{/each}
 		</div>

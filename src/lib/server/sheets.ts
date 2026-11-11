@@ -304,5 +304,35 @@ export const db = {
 			});
 		});
 		return log;
+	},
+
+	async updateLog(id: string, patch: Partial<BrewLogInput>): Promise<BrewLog | null> {
+		if (usingMockData()) return mockDb.updateLog(id, patch);
+		return withSheets(async (sheets) => {
+			const res = await sheets.spreadsheets.values.get({
+				spreadsheetId: env.GOOGLE_SHEET_ID!,
+				range: `${LOGS_SHEET}!A2:J`
+			});
+			const rows = res.data.values ?? [];
+			const idx = rows.findIndex((r) => r[0] === id);
+			if (idx < 0) return null;
+			const current = rowToLog(rows[idx].map(String));
+			if (!current) return null;
+			const next: BrewLog = {
+				...current,
+				...patch,
+				id: current.id,
+				beanId: patch.beanId ?? current.beanId,
+				brewedAt: current.brewedAt
+			};
+			const rowNumber = idx + 2;
+			await sheets.spreadsheets.values.update({
+				spreadsheetId: env.GOOGLE_SHEET_ID!,
+				range: `${LOGS_SHEET}!A${rowNumber}:J${rowNumber}`,
+				valueInputOption: 'RAW',
+				requestBody: { values: [logToRow(next)] }
+			});
+			return next;
+		});
 	}
 };
