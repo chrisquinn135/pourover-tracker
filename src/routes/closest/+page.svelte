@@ -133,7 +133,12 @@
 		</div>
 		<div class="field">
 			<label for="beanSize">Bean size</label>
-			<input id="beanSize" bind:value={beanSize} placeholder="16" />
+			<select id="beanSize" bind:value={beanSize}>
+				<option value="">Unknown</option>
+				<option value="small">Small</option>
+				<option value="medium">Medium</option>
+				<option value="large">Large</option>
+			</select>
 		</div>
 		<div class="md:col-span-2">
 			<button class="btn btn-primary" type="submit" disabled={searching}>

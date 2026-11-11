@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
+	import { BEAN_SIZES } from '#lib/suggestions';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -61,7 +62,7 @@
 <section class="animate-rise mx-auto max-w-2xl">
 	<h1 class="display text-3xl font-bold">Add a bean</h1>
 	<p class="mt-1 text-[var(--muted)]">
-		Name, origin, and roaster are required. Everything else is optional.
+		Name, origin, and roaster are required. Pick a past value or type a new one.
 	</p>
 
 	<SampleBanner show={data.usingMockData} />
@@ -74,7 +75,19 @@
 			</div>
 			<div class="field">
 				<label for="country">Country of origin *</label>
-				<input id="country" bind:value={country} required placeholder="Ethiopia" />
+				<input
+					id="country"
+					list="country-options"
+					bind:value={country}
+					required
+					placeholder="Ethiopia"
+					autocomplete="off"
+				/>
+				<datalist id="country-options">
+					{#each data.suggestions.countries as option}
+						<option value={option}></option>
+					{/each}
+				</datalist>
 			</div>
 			<div class="field">
 				<label for="region">Region</label>
@@ -88,11 +101,34 @@
 			</div>
 			<div class="field">
 				<label for="roaster">Roaster *</label>
-				<input id="roaster" bind:value={roaster} required placeholder="Sey Coffee" />
+				<input
+					id="roaster"
+					list="roaster-options"
+					bind:value={roaster}
+					required
+					placeholder="Sey Coffee"
+					autocomplete="off"
+				/>
+				<datalist id="roaster-options">
+					{#each data.suggestions.roasters as option}
+						<option value={option}></option>
+					{/each}
+				</datalist>
 			</div>
 			<div class="field">
 				<label for="farm">Farm</label>
-				<input id="farm" bind:value={farm} placeholder="Worka Sakaro" />
+				<input
+					id="farm"
+					list="farm-options"
+					bind:value={farm}
+					placeholder="Worka Sakaro"
+					autocomplete="off"
+				/>
+				<datalist id="farm-options">
+					{#each data.suggestions.farms as option}
+						<option value={option}></option>
+					{/each}
+				</datalist>
 			</div>
 			<div class="field">
 				<label for="roastLevel">Roast level</label>
@@ -105,28 +141,57 @@
 			</div>
 			<div class="field">
 				<label for="process">Process</label>
-				<select id="process" bind:value={process}>
-					<option value="">Unknown</option>
-					<option value="washed">Washed</option>
-					<option value="anaerobic washed">Anaerobic washed</option>
-					<option value="honey">Honey</option>
-					<option value="pulped natural">Pulped natural</option>
-					<option value="natural">Natural</option>
-					<option value="anaerobic natural">Anaerobic natural</option>
-					<option value="carbonic maceration">Carbonic maceration</option>
-				</select>
+				<input
+					id="process"
+					list="process-options"
+					bind:value={process}
+					placeholder="washed"
+					autocomplete="off"
+				/>
+				<datalist id="process-options">
+					{#each data.suggestions.processes as option}
+						<option value={option}></option>
+					{/each}
+				</datalist>
 			</div>
 			<div class="field">
 				<label for="variety">Variety</label>
-				<input id="variety" bind:value={variety} placeholder="Gesha, SL28" />
+				<input
+					id="variety"
+					list="variety-options"
+					bind:value={variety}
+					placeholder="Gesha, SL28"
+					autocomplete="off"
+				/>
+				<datalist id="variety-options">
+					{#each data.suggestions.varieties as option}
+						<option value={option}></option>
+					{/each}
+				</datalist>
 			</div>
 			<div class="field">
 				<label for="altitude">Altitude (m)</label>
-				<input id="altitude" bind:value={altitude} placeholder="1800 or 1600-1800" />
+				<input
+					id="altitude"
+					list="altitude-options"
+					bind:value={altitude}
+					placeholder="1800 or 1600-1800"
+					autocomplete="off"
+				/>
+				<datalist id="altitude-options">
+					{#each data.suggestions.altitudes as option}
+						<option value={option}></option>
+					{/each}
+				</datalist>
 			</div>
 			<div class="field">
-				<label for="beanSize">Bean size (screen)</label>
-				<input id="beanSize" bind:value={beanSize} placeholder="16" />
+				<label for="beanSize">Bean size</label>
+				<select id="beanSize" bind:value={beanSize}>
+					<option value="">Unknown</option>
+					{#each BEAN_SIZES as size}
+						<option value={size}>{size[0].toUpperCase() + size.slice(1)}</option>
+					{/each}
+				</select>
 			</div>
 			<div class="field">
 				<label for="status">Status</label>

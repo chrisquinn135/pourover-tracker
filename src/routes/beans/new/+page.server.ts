@@ -1,6 +1,11 @@
 import type { PageServerLoad } from './$types';
 import { db } from '#lib/server/sheets';
+import { beanFieldSuggestions } from '#lib/suggestions';
 
 export const load: PageServerLoad = async () => {
-	return { usingMockData: db.usingMockData() };
+	const beans = await db.listBeans();
+	return {
+		usingMockData: db.usingMockData(),
+		suggestions: beanFieldSuggestions(beans)
+	};
 };

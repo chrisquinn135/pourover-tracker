@@ -53,11 +53,24 @@ export function parseAltitudeMeters(raw: string): number | null {
 	return Number.isFinite(n) ? n : null;
 }
 
-export function parseScreenSize(raw: string): number | null {
-	const match = raw.trim().match(/-?\d+(?:\.\d+)?/);
-	if (!match) return null;
-	const n = Number(match[0]);
-	return Number.isFinite(n) ? n : null;
+const BEAN_SIZE_ORDER = ['small', 'medium', 'large'] as const;
+
+export function beanSizeSimilarity(
+	a: string,
+	b: string
+): { similarity: number; detail: string } | null {
+	const sa = norm(a);
+	const sb = norm(b);
+	const ia = BEAN_SIZE_ORDER.indexOf(sa as (typeof BEAN_SIZE_ORDER)[number]);
+	const ib = BEAN_SIZE_ORDER.indexOf(sb as (typeof BEAN_SIZE_ORDER)[number]);
+	if (ia < 0 || ib < 0) {
+		if (sa === sb) return { similarity: 1, detail: `exact (${sa})` };
+		return null;
+	}
+	const dist = Math.abs(ia - ib);
+	if (dist === 0) return { similarity: 1, detail: `exact (${sa})` };
+	if (dist === 1) return { similarity: 0.5, detail: `adjacent (${sa} ↔ ${sb})` };
+	return { similarity: 0, detail: `opposite (${sa} ↔ ${sb})` };
 }
 
 function parseVarieties(raw: string): Set<string> {
@@ -197,12 +210,8 @@ export function scoreBeans(query: Partial<Bean>, candidate: Bean): {
 	}
 
 	if (present(query.beanSize) && present(candidate.beanSize)) {
-		const qs = parseScreenSize(String(query.beanSize));
-		const cs = parseScreenSize(String(candidate.beanSize));
-		if (qs !== null && cs !== null) {
-			const sim = Math.max(0, 1 - Math.abs(qs - cs) / 3);
-			push(breakdown, 'beanSize', sim, WEIGHTS.beanSize, `Δscreen ${Math.abs(qs - cs)}`);
-		}
+		const size = beanSizeSimilarity(String(query.beanSize), String(candidate.beanSize));
+		if (size) push(breakdown, 'beanSize', size.similarity, WEIGHTS.beanSize, size.detail);
 	}
 
 	const geo = geographyScore(

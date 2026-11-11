@@ -1,5 +1,5 @@
-import { findClosestBeans, parseAltitudeMeters, scoreBeans } from './similarity';
-import type { Bean } from './types';
+import { findClosestBeans, parseAltitudeMeters, scoreBeans } from '../src/lib/similarity';
+import type { Bean } from '../src/lib/types';
 
 function bean(partial: Partial<Bean> & Pick<Bean, 'id' | 'bagName'>): Bean {
 	return {
@@ -55,6 +55,16 @@ test('caps opposite roast', () => {
 	);
 	assert(result, 'scored');
 	assert(result!.score <= 40, `cap expected, got ${result!.score}`);
+});
+
+test('bean size ordered similarity', () => {
+	const adjacent = scoreBeans(
+		{ roastLevel: 'light', beanSize: 'small' },
+		bean({ id: 'm', bagName: 'M', roastLevel: 'light', beanSize: 'medium' })
+	);
+	assert(adjacent, 'adjacent scored');
+	const sizeRow = adjacent!.breakdown.find((r) => r.field === 'beanSize');
+	assert(sizeRow?.similarity === 0.5, 'adjacent size should be 0.5');
 });
 
 test('prefers finished with logs via boost', () => {

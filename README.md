@@ -5,7 +5,7 @@ Personal pourover brew tracker built with **SvelteKit**. Bean bags and brew logs
 ## Features
 
 - **Add a log** — bag, water temp, grind size, grinder, dripper, total time, rating /10, notes
-- **Add a bean** — bag name, origin, region, roaster, farm, roast, variety, altitude, process, size, notes, in-progress/finished (+ ranking when finished)
+- **Add a bean** — bag name, origin, region, roaster, farm, roast, variety, altitude, process, size (small/medium/large), notes, in-progress/finished (+ ranking when finished). Country, roaster, farm, process, variety, and altitude are comboboxes fed by prior bags.
 - **View history** — all pours or filtered to one bag
 - **Bags list** — in-progress and finished lists (finished sorted by ranking)
 - **Find closest bean** — weighted similarity for a starting recipe
