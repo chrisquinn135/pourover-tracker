@@ -8,6 +8,29 @@
 
 	let { data }: PageProps = $props();
 	let savingId = $state<string | null>(null);
+	let importing = $state(false);
+	let importMessage = $state('');
+
+	async function importSeed() {
+		importing = true;
+		importMessage = '';
+		try {
+			const res = await fetch('/api/import-seed', { method: 'POST' });
+			const payload = await res.json().catch(() => ({}));
+			if (!res.ok) throw new Error(payload.message || 'Import failed');
+			if (payload.usingMockData) {
+				importMessage =
+					'Still in sample mode here. Use the published app (with Sheets secrets) or the Apps Script importer.';
+			} else {
+				importMessage = `Imported ${payload.beansAdded ?? 0} bags and ${payload.logsAdded ?? 0} logs into Google Sheets.`;
+				await invalidateAll();
+			}
+		} catch (err) {
+			importMessage = err instanceof Error ? err.message : 'Import failed';
+		} finally {
+			importing = false;
+		}
+	}
 
 	async function markFinished(bean: Bean) {
 		const rankingRaw = prompt(`Rank ${bean.bagName} out of 10`, bean.ranking?.toString() ?? '8');
@@ -51,10 +74,18 @@
 			<h1 class="display text-3xl font-bold">Bags</h1>
 			<p class="mt-1 text-[var(--muted)]">In progress and finished, kept separate.</p>
 		</div>
-		<a class="btn btn-primary" href="/beans/new">Add bean</a>
+		<div class="flex flex-wrap gap-2">
+			<button class="btn btn-ghost" type="button" disabled={importing} onclick={importSeed}>
+				{importing ? 'Importing…' : 'Sync seed to Sheets'}
+			</button>
+			<a class="btn btn-primary" href="/beans/new">Add bean</a>
+		</div>
 	</div>
 
 	<SampleBanner show={data.usingMockData} />
+	{#if importMessage}
+		<p class="mb-5 text-sm text-[var(--muted)]" role="status">{importMessage}</p>
+	{/if}
 
 	{#if data.inProgress.length === 0 && data.finished.length === 0}
 		<EmptyState

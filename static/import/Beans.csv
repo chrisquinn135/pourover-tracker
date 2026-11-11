@@ -1,0 +1,54 @@
+id,bagName,country,region,roaster,farm,roastLevel,variety,altitude,process,beanSize,notes,status,ranking,createdAt,updatedAt
+import-01-golden-tree-anniversary-blend,Golden Tree Anniversary Blend,Ethiopia & Sumatra,,Oslo,,,,,,,"apricot, chocolate, praline
+Roaster location: New York, New York",finished,5,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-02-wild-forest,Wild Forest,Colombia,america,Devocion,,,Mixed,1750-1900,washed,,"Wild Berries, Cherry, Agraz (Andean Blueberry), Cocoa Butter, Caramel
+Roaster location: New York, New York",finished,7,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-03-don-delfino,Don Delfino,Mexico,america,Variety,,,,,,,"Cherry, Meyer lemon, Raw Honey
+Roaster location: New York, New York",finished,7,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-04-razzberry-natural,Razzberry Natural,Oaxaca,america,Constela,,,,,,,"Rasberry
+Roaster location: Mexico City, Mexico",finished,6,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-05-diego-parra,Diego Parra,Colombia,america,Sey,,,Pink Bourbon,1700,washed,,"candied lemon, red currant, and hibiscus.
+Roaster location: New York, New York",finished,5,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-06-kona-prime,Kona Prime,Hawaii,asia,Aroma Craft,,,,,,,"Roaster location: Walnut, California",finished,6,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-07-blue-house,Blue House,Brazil + Sumatra,,Smoking tiger,,,,,,,"Dark cacao, toffee
+Roaster location: 626, California",finished,3,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-08-poppy,Poppy,Colombia,america,Dak,,,Pink Bourban,,washed,,"Lemonade, Jasmine, Peach
+Roaster location: Coffee Sub",finished,9,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-09-la-chorora,La Chorora,Ecuador,america,Three Marks,,,Heirloom (Lupe Maria),1600,washed,,"Ripe Pineapple, Kiwi, Jasmine
+Roaster location: Barcelona, Spain",finished,9,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-10-sidama-bombe,Sidama Bombe,Ethiopia,africa,High beam,,,"JARC 74165, JARC 74110",2000-2200,washed,,"Berry Punch, Passionfruit, Jumpl
+Roaster location: New York, New York",finished,6.5,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-11-elto-coffee,Elto Coffee,Ethiopia,africa,Archers,,,74158,2350,washed,,"Jasmine, Lemongrass, pear, earl gray
+Roaster location: Coffee Sub",finished,9,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-12-white-orchid-purple-caturra,White Orchid Purple Caturra,China,asia,Coffee Project,,,Purple Caturra,1800,washed,,"Starfruit, Rainer Cherry, White Flower
+Roaster location: New York, New York",finished,7,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-13-shirya-natural,Shirya Natural,Rwanda,africa,La Cabra,,,,,natural,,"Berry, Yogurt
+Roaster location: New York, New York",finished,8,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-14-shine-punch,Shine Punch,Myanmar,asia,Bazu,,,SL28,,anaerobic natural,,"Mango, Pineapple, Cacao nibs
+Roaster location: New York, New York",finished,8,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-15-kiambu-handege-aa,Kiambu Handege AA,Kenya,africa,Glitch,,,"SL 28, SL 34, Ruiru11, Batian",1750,washed,,"Tomato, Grapefruit, Raisin
+Roaster location: Tokyo, Japan
+15 grind, 205 temp",finished,9,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-16-cauca-el-paraiso-letty,Cauca El Paraiso (Letty),Colombia,america,Glitch,,,Geisha,1730,anaerobic washed,,"Peach Tea, Nectarine, Floral
+Roaster location: Tokyo, Japan
+15 grind, 205 temp",finished,8.5,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-17-jaguar-honey,Jaguar Honey,Costa Rica,america,Blue Hummingbird Coffee,,,Caturra,,honey,,"Milk Chocolate, Red Apple, Cane sugar, dried fruit
+Roaster location: Irvine, California",in_progress,,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-18-ombligon,Ombligon,Colombia,america,Pier Coffee Roasters,,,,,anaerobic natural,,"Floral, candy-like; sweet red fruits.
+Roaster location: Puglia, Italy",finished,6,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-19-finca-la-reserva,Finca La Reserva,Colombia,america,Aliena Coffee Roasters,,,Sidra,1800,washed,,"Yellow peach, wild strawberries, and balsamic herbs
+Roaster location: Rome, Italy
+12 grind (electric), 205 temp",finished,7,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-20-gigesa,Gigesa,Ethiopia,africa,Dune Coffee Roasters,,,,,natural,,"Strawberry, Citrus, Sparkling
+Roaster location: Santa Barbara, California
+18 grind (electric), 203 temp",finished,8,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-21-imbachi-reserve,Imbachi Reserve,Colombia,america,Doubleshot,,,Pink Bourbon and Caturra,,washed,,"Plums, lychee and lemongrass
+Roaster location: Czech Republic",in_progress,,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-22-karimikui-aa,Karimikui AA,Kenya,africa,Three Marks,,,"Ruiru 11, SL28, SL34",1600-1700,washed,,"Cherry, Maple Syrup, Tomato
+Roaster location: Barcelona, Spain
+10.5 grind, 202 temp",finished,8.5,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-23-aponte,Aponte,Colombia,america,Three Marks,,,Caturra,2150,honey,,"Orange, Red apple, honey
+Roaster location: Barcelona, Spain",finished,7,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z
+import-24-cabra-noir-ombligon,Cabra Noir Ombligon,Colombia,america,Coffee Project,,,Ombligon,1850,washed,,"Rasberry Jam, Blackcurrant, Guava Candy
+Roaster location: New York, New York
+7.5 grind, 202 temp",finished,9,2026-01-01T12:00:00.000Z,2026-01-01T12:00:00.000Z

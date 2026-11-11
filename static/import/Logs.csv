@@ -1,0 +1,7 @@
+id,beanId,waterTemp,grindSize,grinder,dripper,totalTime,rating,notes,brewedAt
+import-log-15,import-15-kiambu-handege-aa,205,15,,,,9,"15 grind, 205 temp",2026-01-01T12:00:00.000Z
+import-log-16,import-16-cauca-el-paraiso-letty,205,15,,,,8.5,"15 grind, 205 temp",2026-01-01T12:00:00.000Z
+import-log-19,import-19-finca-la-reserva,205,12,,,,7,"12 grind (electric), 205 temp",2026-01-01T12:00:00.000Z
+import-log-20,import-20-gigesa,203,18,,,,8,"18 grind (electric), 203 temp",2026-01-01T12:00:00.000Z
+import-log-22,import-22-karimikui-aa,202,10.5,,,,8.5,"10.5 grind, 202 temp",2026-01-01T12:00:00.000Z
+import-log-24,import-24-cabra-noir-ombligon,202,7.5,,,,9,"7.5 grind, 202 temp",2026-01-01T12:00:00.000Z
