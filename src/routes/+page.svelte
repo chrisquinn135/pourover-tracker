@@ -65,7 +65,7 @@
 		</div>
 	</div>
 
-	{#if data.logs.length === 0}
+	{#if data.feedLogs.length === 0}
 		<EmptyState
 			title="No brews yet"
 			body="Log your first pourover to start building your feed."
@@ -74,7 +74,7 @@
 		/>
 	{:else}
 		<div class="stagger space-y-3">
-			{#each data.logs as log}
+			{#each data.feedLogs as log}
 				<article class="panel p-5">
 					<div class="flex flex-wrap items-start justify-between gap-3">
 						<div>

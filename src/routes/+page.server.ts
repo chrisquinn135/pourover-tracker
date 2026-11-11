@@ -1,18 +1,15 @@
 import type { PageServerLoad } from './$types';
-import { db } from '#lib/server/sheets';
 
-export const load: PageServerLoad = async ({ url }) => {
+/** Filter only — beans/logs come from the root layout store. */
+export const load: PageServerLoad = async ({ url, parent }) => {
+	const { beans, logs } = await parent();
 	const beanId = url.searchParams.get('beanId') ?? '';
-	const [logs, beans] = await Promise.all([
-		db.listLogs(beanId || undefined),
-		db.listBeans()
-	]);
 	const beanMap = Object.fromEntries(beans.map((b) => [b.id, b]));
+	const filtered = beanId ? logs.filter((l) => l.beanId === beanId) : logs;
+
 	return {
 		beanId,
-		beans,
-		usingMockData: db.usingMockData(),
-		logs: logs.map((log) => ({
+		feedLogs: filtered.map((log) => ({
 			...log,
 			beanName: beanMap[log.beanId]?.bagName ?? 'Unknown bag'
 		}))

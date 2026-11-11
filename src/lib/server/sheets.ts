@@ -6,7 +6,7 @@ import { beanImportKey, seedBeans, seedLogs } from './seed';
 
 const BEANS_SHEET = 'Beans';
 const LOGS_SHEET = 'Logs';
-const CACHE_TTL_MS = 15_000;
+/** Keep Sheets reads until a local write (or process restart / full cold start). */
 
 const BEAN_HEADERS = [
 	'id',
@@ -293,10 +293,7 @@ export const db = {
 	async listBeans(): Promise<Bean[]> {
 		if (usingMockData()) return mockDb.listBeans();
 		const s = state();
-		const cached = s.beansCache;
-		if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
-			return [...cached.data];
-		}
+		if (s.beansCache) return [...s.beansCache.data];
 		const sheets = await ensureReady();
 		const beans = (await readBeansRaw(sheets)).sort((a, b) =>
 			b.updatedAt.localeCompare(a.updatedAt)
@@ -380,13 +377,11 @@ export const db = {
 	async listLogs(beanId?: string): Promise<BrewLog[]> {
 		if (usingMockData()) return mockDb.listLogs(beanId);
 		const s = state();
-		let logs = s.logsCache?.data;
-		if (!logs || Date.now() - (s.logsCache?.at ?? 0) >= CACHE_TTL_MS) {
+		if (!s.logsCache) {
 			const sheets = await ensureReady();
-			logs = await readLogsRaw(sheets);
-			s.logsCache = { at: Date.now(), data: logs };
+			s.logsCache = { at: Date.now(), data: await readLogsRaw(sheets) };
 		}
-		return logs
+		return s.logsCache.data
 			.filter((l) => (beanId ? l.beanId === beanId : true))
 			.sort((a, b) => b.brewedAt.localeCompare(a.brewedAt));
 	},
