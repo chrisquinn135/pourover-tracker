@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { google, type sheets_v4 } from 'googleapis';
 import { env } from './env';
 import type { Bean, BeanInput, BrewLog, BrewLogInput } from '../types';
 import { mockDb } from './mock-store';
@@ -6,6 +6,7 @@ import { beanImportKey, seedBeans, seedLogs } from './seed';
 
 const BEANS_SHEET = 'Beans';
 const LOGS_SHEET = 'Logs';
+const CACHE_TTL_MS = 15_000;
 
 const BEAN_HEADERS = [
 	'id',
@@ -39,6 +40,23 @@ const LOG_HEADERS = [
 	'brewedAt'
 ] as const;
 
+type SheetsClient = sheets_v4.Sheets;
+
+const g = globalThis as typeof globalThis & {
+	__pouroverSheets?: {
+		client?: SheetsClient;
+		ready?: Promise<void>;
+		seedImport?: Promise<ImportResult>;
+		beansCache?: { at: number; data: Bean[] };
+		logsCache?: { at: number; data: BrewLog[] };
+	};
+};
+
+function state() {
+	if (!g.__pouroverSheets) g.__pouroverSheets = {};
+	return g.__pouroverSheets;
+}
+
 export function usingMockData(): boolean {
 	return !(
 		env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
@@ -51,23 +69,26 @@ function privateKey(): string {
 	return (env.GOOGLE_PRIVATE_KEY ?? '').replace(/\\n/g, '\n');
 }
 
-async function sheetsClient() {
-	const auth = new google.auth.JWT({
-		email: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-		key: privateKey(),
-		scopes: ['https://www.googleapis.com/auth/spreadsheets']
-	});
-	return google.sheets({ version: 'v4', auth });
+function getClient(): SheetsClient {
+	const s = state();
+	if (!s.client) {
+		const auth = new google.auth.JWT({
+			email: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+			key: privateKey(),
+			scopes: ['https://www.googleapis.com/auth/spreadsheets']
+		});
+		s.client = google.sheets({ version: 'v4', auth });
+	}
+	return s.client;
 }
 
-async function ensureSheet(
-	sheets: Awaited<ReturnType<typeof sheetsClient>>,
-	title: string,
-	headers: readonly string[]
-) {
+async function ensureOneSheet(sheets: SheetsClient, title: string, headers: readonly string[]) {
 	const spreadsheetId = env.GOOGLE_SHEET_ID!;
-	const meta = await sheets.spreadsheets.get({ spreadsheetId });
-	const existing = meta.data.sheets?.find((s) => s.properties?.title === title);
+	const meta = await sheets.spreadsheets.get({
+		spreadsheetId,
+		fields: 'sheets.properties.title'
+	});
+	const existing = meta.data.sheets?.find((sheet) => sheet.properties?.title === title);
 	if (!existing) {
 		await sheets.spreadsheets.batchUpdate({
 			spreadsheetId,
@@ -90,6 +111,30 @@ async function ensureSheet(
 			requestBody: { values: [headers as unknown as string[]] }
 		});
 	}
+}
+
+async function ensureReady(): Promise<SheetsClient> {
+	const sheets = getClient();
+	const s = state();
+	if (!s.ready) {
+		s.ready = Promise.all([
+			ensureOneSheet(sheets, BEANS_SHEET, BEAN_HEADERS),
+			ensureOneSheet(sheets, LOGS_SHEET, LOG_HEADERS)
+		])
+			.then(() => undefined)
+			.catch((err) => {
+				s.ready = undefined;
+				throw err;
+			});
+	}
+	await s.ready;
+	return sheets;
+}
+
+function invalidateCache() {
+	const s = state();
+	s.beansCache = undefined;
+	s.logsCache = undefined;
 }
 
 function rowToBean(row: string[]): Bean | null {
@@ -168,16 +213,7 @@ function logToRow(log: BrewLog): string[] {
 	];
 }
 
-async function withSheets<T>(fn: (sheets: Awaited<ReturnType<typeof sheetsClient>>) => Promise<T>) {
-	const sheets = await sheetsClient();
-	await ensureSheet(sheets, BEANS_SHEET, BEAN_HEADERS);
-	await ensureSheet(sheets, LOGS_SHEET, LOG_HEADERS);
-	return fn(sheets);
-}
-
-async function readBeansRaw(
-	sheets: Awaited<ReturnType<typeof sheetsClient>>
-): Promise<Bean[]> {
+async function readBeansRaw(sheets: SheetsClient): Promise<Bean[]> {
 	const res = await sheets.spreadsheets.values.get({
 		spreadsheetId: env.GOOGLE_SHEET_ID!,
 		range: `${BEANS_SHEET}!A2:P`
@@ -186,9 +222,7 @@ async function readBeansRaw(
 	return rows.map((r) => rowToBean(r.map(String))).filter((b): b is Bean => Boolean(b));
 }
 
-async function readLogsRaw(
-	sheets: Awaited<ReturnType<typeof sheetsClient>>
-): Promise<BrewLog[]> {
+async function readLogsRaw(sheets: SheetsClient): Promise<BrewLog[]> {
 	const res = await sheets.spreadsheets.values.get({
 		spreadsheetId: env.GOOGLE_SHEET_ID!,
 		range: `${LOGS_SHEET}!A2:J`
@@ -199,60 +233,58 @@ async function readLogsRaw(
 
 type ImportResult = { beansAdded: number; logsAdded: number };
 
-const globalImport = globalThis as typeof globalThis & {
-	__pouroverSeedImport?: Promise<ImportResult>;
-};
-
 async function importSpreadsheetSeed(): Promise<ImportResult> {
-	return withSheets(async (sheets) => {
-		const existingBeans = await readBeansRaw(sheets);
-		const existingKeys = new Set(existingBeans.map(beanImportKey));
-		const beansToAdd = seedBeans.filter((bean) => !existingKeys.has(beanImportKey(bean)));
+	const sheets = await ensureReady();
+	const existingBeans = await readBeansRaw(sheets);
+	const existingKeys = new Set(existingBeans.map(beanImportKey));
+	const beansToAdd = seedBeans.filter((bean) => !existingKeys.has(beanImportKey(bean)));
 
-		if (beansToAdd.length > 0) {
-			await sheets.spreadsheets.values.append({
-				spreadsheetId: env.GOOGLE_SHEET_ID!,
-				range: `${BEANS_SHEET}!A:P`,
-				valueInputOption: 'RAW',
-				insertDataOption: 'INSERT_ROWS',
-				requestBody: { values: beansToAdd.map(beanToRow) }
-			});
-		}
+	if (beansToAdd.length > 0) {
+		await sheets.spreadsheets.values.append({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${BEANS_SHEET}!A:P`,
+			valueInputOption: 'RAW',
+			insertDataOption: 'INSERT_ROWS',
+			requestBody: { values: beansToAdd.map(beanToRow) }
+		});
+	}
 
-		const existingLogs = await readLogsRaw(sheets);
-		const existingLogIds = new Set(existingLogs.map((l) => l.id));
-		const knownBeanIds = new Set([
-			...existingBeans.map((b) => b.id),
-			...beansToAdd.map((b) => b.id)
-		]);
-		const logsToAdd = seedLogs.filter(
-			(log) => !existingLogIds.has(log.id) && knownBeanIds.has(log.beanId)
-		);
+	const existingLogs = await readLogsRaw(sheets);
+	const existingLogIds = new Set(existingLogs.map((l) => l.id));
+	const knownBeanIds = new Set([
+		...existingBeans.map((b) => b.id),
+		...beansToAdd.map((b) => b.id)
+	]);
+	const logsToAdd = seedLogs.filter(
+		(log) => !existingLogIds.has(log.id) && knownBeanIds.has(log.beanId)
+	);
 
-		if (logsToAdd.length > 0) {
-			await sheets.spreadsheets.values.append({
-				spreadsheetId: env.GOOGLE_SHEET_ID!,
-				range: `${LOGS_SHEET}!A:J`,
-				valueInputOption: 'RAW',
-				insertDataOption: 'INSERT_ROWS',
-				requestBody: { values: logsToAdd.map(logToRow) }
-			});
-		}
+	if (logsToAdd.length > 0) {
+		await sheets.spreadsheets.values.append({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${LOGS_SHEET}!A:J`,
+			valueInputOption: 'RAW',
+			insertDataOption: 'INSERT_ROWS',
+			requestBody: { values: logsToAdd.map(logToRow) }
+		});
+	}
 
-		return { beansAdded: beansToAdd.length, logsAdded: logsToAdd.length };
-	});
+	invalidateCache();
+	return { beansAdded: beansToAdd.length, logsAdded: logsToAdd.length };
 }
 
+/** Only for the Sync seed button — not on every page load. */
 export async function ensureSpreadsheetSeeded(force = false): Promise<ImportResult | null> {
 	if (usingMockData()) return null;
-	if (force) globalImport.__pouroverSeedImport = undefined;
-	if (!globalImport.__pouroverSeedImport) {
-		globalImport.__pouroverSeedImport = importSpreadsheetSeed().catch((err) => {
-			globalImport.__pouroverSeedImport = undefined;
+	const s = state();
+	if (force) s.seedImport = undefined;
+	if (!s.seedImport) {
+		s.seedImport = importSpreadsheetSeed().catch((err) => {
+			s.seedImport = undefined;
 			throw err;
 		});
 	}
-	return globalImport.__pouroverSeedImport;
+	return s.seedImport;
 }
 
 export const db = {
@@ -260,11 +292,17 @@ export const db = {
 
 	async listBeans(): Promise<Bean[]> {
 		if (usingMockData()) return mockDb.listBeans();
-		await ensureSpreadsheetSeeded();
-		return withSheets(async (sheets) => {
-			const beans = await readBeansRaw(sheets);
-			return beans.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-		});
+		const s = state();
+		const cached = s.beansCache;
+		if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
+			return [...cached.data];
+		}
+		const sheets = await ensureReady();
+		const beans = (await readBeansRaw(sheets)).sort((a, b) =>
+			b.updatedAt.localeCompare(a.updatedAt)
+		);
+		s.beansCache = { at: Date.now(), data: beans };
+		return [...beans];
 	},
 
 	async getBean(id: string): Promise<Bean | null> {
@@ -293,61 +331,64 @@ export const db = {
 			createdAt: timestamp,
 			updatedAt: timestamp
 		};
-		await withSheets(async (sheets) => {
-			await sheets.spreadsheets.values.append({
-				spreadsheetId: env.GOOGLE_SHEET_ID!,
-				range: `${BEANS_SHEET}!A:P`,
-				valueInputOption: 'RAW',
-				insertDataOption: 'INSERT_ROWS',
-				requestBody: { values: [beanToRow(bean)] }
-			});
+		const sheets = await ensureReady();
+		await sheets.spreadsheets.values.append({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${BEANS_SHEET}!A:P`,
+			valueInputOption: 'RAW',
+			insertDataOption: 'INSERT_ROWS',
+			requestBody: { values: [beanToRow(bean)] }
 		});
+		invalidateCache();
 		return bean;
 	},
 
 	async updateBean(id: string, patch: Partial<BeanInput>): Promise<Bean | null> {
 		if (usingMockData()) return mockDb.updateBean(id, patch);
-		return withSheets(async (sheets) => {
-			const res = await sheets.spreadsheets.values.get({
-				spreadsheetId: env.GOOGLE_SHEET_ID!,
-				range: `${BEANS_SHEET}!A2:P`
-			});
-			const rows = res.data.values ?? [];
-			const idx = rows.findIndex((r) => r[0] === id);
-			if (idx < 0) return null;
-			const current = rowToBean(rows[idx].map(String));
-			if (!current) return null;
-			const next: Bean = {
-				...current,
-				...patch,
-				id: current.id,
-				createdAt: current.createdAt,
-				updatedAt: new Date().toISOString(),
-				ranking:
-					(patch.status ?? current.status) === 'finished'
-						? (patch.ranking ?? current.ranking)
-						: null
-			};
-			const rowNumber = idx + 2;
-			await sheets.spreadsheets.values.update({
-				spreadsheetId: env.GOOGLE_SHEET_ID!,
-				range: `${BEANS_SHEET}!A${rowNumber}:P${rowNumber}`,
-				valueInputOption: 'RAW',
-				requestBody: { values: [beanToRow(next)] }
-			});
-			return next;
+		const sheets = await ensureReady();
+		const res = await sheets.spreadsheets.values.get({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${BEANS_SHEET}!A2:P`
 		});
+		const rows = res.data.values ?? [];
+		const idx = rows.findIndex((r) => r[0] === id);
+		if (idx < 0) return null;
+		const current = rowToBean(rows[idx].map(String));
+		if (!current) return null;
+		const next: Bean = {
+			...current,
+			...patch,
+			id: current.id,
+			createdAt: current.createdAt,
+			updatedAt: new Date().toISOString(),
+			ranking:
+				(patch.status ?? current.status) === 'finished'
+					? (patch.ranking ?? current.ranking)
+					: null
+		};
+		const rowNumber = idx + 2;
+		await sheets.spreadsheets.values.update({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${BEANS_SHEET}!A${rowNumber}:P${rowNumber}`,
+			valueInputOption: 'RAW',
+			requestBody: { values: [beanToRow(next)] }
+		});
+		invalidateCache();
+		return next;
 	},
 
 	async listLogs(beanId?: string): Promise<BrewLog[]> {
 		if (usingMockData()) return mockDb.listLogs(beanId);
-		await ensureSpreadsheetSeeded();
-		return withSheets(async (sheets) => {
-			const logs = await readLogsRaw(sheets);
-			return logs
-				.filter((l) => (beanId ? l.beanId === beanId : true))
-				.sort((a, b) => b.brewedAt.localeCompare(a.brewedAt));
-		});
+		const s = state();
+		let logs = s.logsCache?.data;
+		if (!logs || Date.now() - (s.logsCache?.at ?? 0) >= CACHE_TTL_MS) {
+			const sheets = await ensureReady();
+			logs = await readLogsRaw(sheets);
+			s.logsCache = { at: Date.now(), data: logs };
+		}
+		return logs
+			.filter((l) => (beanId ? l.beanId === beanId : true))
+			.sort((a, b) => b.brewedAt.localeCompare(a.brewedAt));
 	},
 
 	async createLog(input: BrewLogInput): Promise<BrewLog> {
@@ -364,45 +405,45 @@ export const db = {
 			notes: input.notes || '',
 			brewedAt: input.brewedAt || new Date().toISOString()
 		};
-		await withSheets(async (sheets) => {
-			await sheets.spreadsheets.values.append({
-				spreadsheetId: env.GOOGLE_SHEET_ID!,
-				range: `${LOGS_SHEET}!A:J`,
-				valueInputOption: 'RAW',
-				insertDataOption: 'INSERT_ROWS',
-				requestBody: { values: [logToRow(log)] }
-			});
+		const sheets = await ensureReady();
+		await sheets.spreadsheets.values.append({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${LOGS_SHEET}!A:J`,
+			valueInputOption: 'RAW',
+			insertDataOption: 'INSERT_ROWS',
+			requestBody: { values: [logToRow(log)] }
 		});
+		invalidateCache();
 		return log;
 	},
 
 	async updateLog(id: string, patch: Partial<BrewLogInput>): Promise<BrewLog | null> {
 		if (usingMockData()) return mockDb.updateLog(id, patch);
-		return withSheets(async (sheets) => {
-			const res = await sheets.spreadsheets.values.get({
-				spreadsheetId: env.GOOGLE_SHEET_ID!,
-				range: `${LOGS_SHEET}!A2:J`
-			});
-			const rows = res.data.values ?? [];
-			const idx = rows.findIndex((r) => r[0] === id);
-			if (idx < 0) return null;
-			const current = rowToLog(rows[idx].map(String));
-			if (!current) return null;
-			const next: BrewLog = {
-				...current,
-				...patch,
-				id: current.id,
-				beanId: patch.beanId ?? current.beanId,
-				brewedAt: current.brewedAt
-			};
-			const rowNumber = idx + 2;
-			await sheets.spreadsheets.values.update({
-				spreadsheetId: env.GOOGLE_SHEET_ID!,
-				range: `${LOGS_SHEET}!A${rowNumber}:J${rowNumber}`,
-				valueInputOption: 'RAW',
-				requestBody: { values: [logToRow(next)] }
-			});
-			return next;
+		const sheets = await ensureReady();
+		const res = await sheets.spreadsheets.values.get({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${LOGS_SHEET}!A2:J`
 		});
+		const rows = res.data.values ?? [];
+		const idx = rows.findIndex((r) => r[0] === id);
+		if (idx < 0) return null;
+		const current = rowToLog(rows[idx].map(String));
+		if (!current) return null;
+		const next: BrewLog = {
+			...current,
+			...patch,
+			id: current.id,
+			beanId: patch.beanId ?? current.beanId,
+			brewedAt: current.brewedAt
+		};
+		const rowNumber = idx + 2;
+		await sheets.spreadsheets.values.update({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${LOGS_SHEET}!A${rowNumber}:J${rowNumber}`,
+			valueInputOption: 'RAW',
+			requestBody: { values: [logToRow(next)] }
+		});
+		invalidateCache();
+		return next;
 	}
 };
