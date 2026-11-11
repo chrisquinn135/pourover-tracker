@@ -7,8 +7,8 @@ function parseBeanBody(body: Record<string, unknown>): BeanInput {
 	const bagName = String(body.bagName ?? '').trim();
 	const country = String(body.country ?? '').trim();
 	const roaster = String(body.roaster ?? '').trim();
-	if (!bagName || !country || !roaster) {
-		throw error(400, 'bagName, country, and roaster are required');
+	if (!bagName || !roaster) {
+		throw error(400, 'bagName and roaster are required');
 	}
 
 	const status = (String(body.status ?? 'in_progress') as BeanStatus) || 'in_progress';

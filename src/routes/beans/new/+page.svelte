@@ -62,7 +62,7 @@
 <section class="animate-rise mx-auto max-w-2xl">
 	<h1 class="display text-3xl font-bold">Add a bean</h1>
 	<p class="mt-1 text-[var(--muted)]">
-		Name, origin, and roaster are required. Pick a past value or type a new one.
+		Name and roaster are required. Country and everything else is optional.
 	</p>
 
 	<SampleBanner show={data.usingMockData} />
@@ -74,12 +74,11 @@
 				<input id="bagName" bind:value={bagName} required placeholder="Worka Sakaro Gesha" />
 			</div>
 			<div class="field">
-				<label for="country">Country of origin *</label>
+				<label for="country">Country of origin</label>
 				<input
 					id="country"
 					list="country-options"
 					bind:value={country}
-					required
 					placeholder="Ethiopia"
 					autocomplete="off"
 				/>
