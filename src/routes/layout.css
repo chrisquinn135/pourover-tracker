@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+:root {
+	--ink: #18211d;
+	--muted: #5a6a62;
+	--paper: #eef3ef;
+	--paper-deep: #dfe8e2;
+	--surface: rgba(255, 255, 255, 0.78);
+	--accent: #1f6b56;
+	--accent-deep: #145041;
+	--warn: #9a5b2f;
+	--line: rgba(24, 33, 29, 0.12);
+	--shadow: 0 18px 40px rgba(24, 33, 29, 0.08);
+	--radius: 18px;
+	--font-display: 'Figtree', sans-serif;
+	--font-body: 'Libre Franklin', sans-serif;
+}
+
+html,
+body {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	color: var(--ink);
+	font-family: var(--font-body);
+	background:
+		radial-gradient(1200px 600px at 10% -10%, rgba(31, 107, 86, 0.16), transparent 55%),
+		radial-gradient(900px 500px at 100% 0%, rgba(154, 91, 47, 0.12), transparent 50%),
+		linear-gradient(180deg, #f7faf8 0%, var(--paper) 45%, var(--paper-deep) 100%);
+	background-attachment: fixed;
+}
+
+h1,
+h2,
+h3,
+.display {
+	font-family: var(--font-display);
+	letter-spacing: -0.03em;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+@keyframes rise-in {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.animate-rise {
+	animation: rise-in 0.55s ease both;
+}
+
+.animate-fade {
+	animation: fade-in 0.4s ease both;
+}
+
+.stagger > * {
+	animation: rise-in 0.5s ease both;
+}
+
+.stagger > *:nth-child(1) {
+	animation-delay: 0.02s;
+}
+.stagger > *:nth-child(2) {
+	animation-delay: 0.08s;
+}
+.stagger > *:nth-child(3) {
+	animation-delay: 0.14s;
+}
+.stagger > *:nth-child(4) {
+	animation-delay: 0.2s;
+}
+.stagger > *:nth-child(5) {
+	animation-delay: 0.26s;
+}
+.stagger > *:nth-child(6) {
+	animation-delay: 0.32s;
+}
+
+.panel {
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	backdrop-filter: blur(10px);
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.field label {
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.field input,
+.field select,
+.field textarea {
+	width: 100%;
+	border-radius: 12px;
+	border: 1px solid var(--line);
+	background: rgba(255, 255, 255, 0.9);
+	padding: 0.7rem 0.85rem;
+	color: var(--ink);
+	font: inherit;
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+	outline: none;
+	border-color: rgba(31, 107, 86, 0.55);
+	box-shadow: 0 0 0 3px rgba(31, 107, 86, 0.15);
+}
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.45rem;
+	border-radius: 999px;
+	padding: 0.7rem 1.15rem;
+	font-weight: 600;
+	border: 1px solid transparent;
+	cursor: pointer;
+	transition:
+		transform 0.15s ease,
+		background 0.2s ease,
+		border-color 0.2s ease;
+}
+
+.btn:hover {
+	transform: translateY(-1px);
+}
+
+.btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.btn-primary {
+	background: var(--accent);
+	color: white;
+}
+
+.btn-primary:hover {
+	background: var(--accent-deep);
+}
+
+.btn-ghost {
+	background: transparent;
+	border-color: var(--line);
+	color: var(--ink);
+}
+
+.btn-ghost:hover {
+	border-color: rgba(31, 107, 86, 0.35);
+	background: rgba(31, 107, 86, 0.06);
+}
+
+.badge {
+	display: inline-flex;
+	align-items: center;
+	border-radius: 999px;
+	padding: 0.2rem 0.65rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+
+.badge-high {
+	background: rgba(31, 107, 86, 0.14);
+	color: var(--accent-deep);
+}
+
+.badge-medium {
+	background: rgba(154, 91, 47, 0.14);
+	color: var(--warn);
+}
+
+.badge-low {
+	background: rgba(24, 33, 29, 0.08);
+	color: var(--muted);
+}
+
+.badge-progress {
+	background: rgba(31, 107, 86, 0.12);
+	color: var(--accent-deep);
+}
+
+.badge-finished {
+	background: rgba(24, 33, 29, 0.08);
+	color: var(--ink);
+}
+
+.sample-banner {
+	border: 1px dashed rgba(31, 107, 86, 0.35);
+	background: rgba(31, 107, 86, 0.08);
+	color: var(--accent-deep);
+	border-radius: 12px;
+	padding: 0.65rem 0.9rem;
+	font-size: 0.9rem;
+}
