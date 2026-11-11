@@ -71,7 +71,7 @@
 		<div class="grid gap-4 md:grid-cols-2">
 			<div class="field md:col-span-2">
 				<label for="bagName">Bag name *</label>
-				<input id="bagName" bind:value={bagName} required placeholder="Worka Sakaro Gesha" />
+				<input id="bagName" bind:value={bagName} required />
 			</div>
 			<div class="field">
 				<label for="country">Country of origin</label>
@@ -79,7 +79,6 @@
 					id="country"
 					list="country-options"
 					bind:value={country}
-					placeholder="Ethiopia"
 					autocomplete="off"
 				/>
 				<datalist id="country-options">
@@ -105,7 +104,6 @@
 					list="roaster-options"
 					bind:value={roaster}
 					required
-					placeholder="Sey Coffee"
 					autocomplete="off"
 				/>
 				<datalist id="roaster-options">
@@ -120,7 +118,6 @@
 					id="farm"
 					list="farm-options"
 					bind:value={farm}
-					placeholder="Worka Sakaro"
 					autocomplete="off"
 				/>
 				<datalist id="farm-options">
@@ -144,7 +141,6 @@
 					id="process"
 					list="process-options"
 					bind:value={process}
-					placeholder="washed"
 					autocomplete="off"
 				/>
 				<datalist id="process-options">
@@ -159,7 +155,6 @@
 					id="variety"
 					list="variety-options"
 					bind:value={variety}
-					placeholder="Gesha, SL28"
 					autocomplete="off"
 				/>
 				<datalist id="variety-options">
@@ -174,7 +169,6 @@
 					id="altitude"
 					list="altitude-options"
 					bind:value={altitude}
-					placeholder="1800 or 1600-1800"
 					autocomplete="off"
 				/>
 				<datalist id="altitude-options">
@@ -221,7 +215,6 @@
 				id="notes"
 				rows="4"
 				bind:value={notes}
-				placeholder="Anything about the bag — tasting goals, roast date, leftover grams…"
 			></textarea>
 		</div>
 

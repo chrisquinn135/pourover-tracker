@@ -132,7 +132,6 @@
 					id="bagSearch"
 					type="search"
 					bind:value={search}
-					placeholder="Filter by bag name or roaster"
 					autocomplete="off"
 				/>
 			</div>

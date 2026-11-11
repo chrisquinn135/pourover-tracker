@@ -92,11 +92,11 @@
 			<div class="grid gap-4 md:grid-cols-2">
 				<div class="field">
 					<label for="waterTemp">Water temp (°F)</label>
-					<input id="waterTemp" bind:value={waterTemp} placeholder="201" inputmode="decimal" />
+					<input id="waterTemp" bind:value={waterTemp} inputmode="decimal" />
 				</div>
 				<div class="field">
 					<label for="grindSize">Grind size</label>
-					<input id="grindSize" bind:value={grindSize} placeholder="20" />
+					<input id="grindSize" bind:value={grindSize} />
 				</div>
 				<div class="field">
 					<label for="grinder">Grinder</label>
@@ -104,7 +104,6 @@
 						id="grinder"
 						list="grinder-options"
 						bind:value={grinder}
-						placeholder="ZP6"
 						autocomplete="off"
 					/>
 					<datalist id="grinder-options">
@@ -119,7 +118,6 @@
 						id="dripper"
 						list="dripper-options"
 						bind:value={dripper}
-						placeholder="V60"
 						autocomplete="off"
 					/>
 					<datalist id="dripper-options">
@@ -141,7 +139,6 @@
 								min="0"
 								step="1"
 								bind:value={minutes}
-								placeholder="2"
 							/>
 						</div>
 						<div class="field">
@@ -153,7 +150,6 @@
 								max="59"
 								step="1"
 								bind:value={seconds}
-								placeholder="45"
 							/>
 						</div>
 					</div>
@@ -167,14 +163,13 @@
 						max="10"
 						step="0.5"
 						bind:value={rating}
-						placeholder="8"
 					/>
 				</div>
 			</div>
 
 			<div class="field">
 				<label for="notes">Notes</label>
-				<textarea id="notes" rows="4" bind:value={notes} placeholder="Bloom, pours, taste notes…"
+				<textarea id="notes" rows="4" bind:value={notes}
 				></textarea>
 			</div>
 

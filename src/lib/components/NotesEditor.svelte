@@ -50,7 +50,6 @@
 			class="w-full rounded-xl border border-[var(--line)] bg-white/90 px-3 py-2 text-sm"
 			rows="4"
 			bind:value={draft}
-			placeholder="Write anything you want to remember…"
 		></textarea>
 		{#if error}
 			<p class="mt-2 text-sm text-red-700" role="alert">{error}</p>

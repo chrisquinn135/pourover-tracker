@@ -169,7 +169,6 @@
 				min="0"
 				step="1"
 				bind:value={altitude}
-				placeholder="1800"
 				inputmode="numeric"
 			/>
 		</div>
