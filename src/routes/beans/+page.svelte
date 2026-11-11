@@ -13,6 +13,18 @@
 	let importMessage = $state('');
 	let pendingDelete = $state<Bean | null>(null);
 	let deleting = $state(false);
+	let search = $state('');
+
+	function matchesSearch(bean: Bean, query: string) {
+		const q = query.trim().toLowerCase();
+		if (!q) return true;
+		return (
+			bean.bagName.toLowerCase().includes(q) || bean.roaster.toLowerCase().includes(q)
+		);
+	}
+
+	let filteredInProgress = $derived(data.inProgress.filter((b) => matchesSearch(b, search)));
+	let filteredFinished = $derived(data.finished.filter((b) => matchesSearch(b, search)));
 
 	async function importSeed() {
 		importing = true;
@@ -113,14 +125,32 @@
 			cta="Add a bean"
 		/>
 	{:else}
+		<div class="panel mb-5 p-4">
+			<div class="field max-w-md">
+				<label for="bagSearch">Search</label>
+				<input
+					id="bagSearch"
+					type="search"
+					bind:value={search}
+					placeholder="Filter by bag name or roaster"
+					autocomplete="off"
+				/>
+			</div>
+		</div>
+
+		{#if filteredInProgress.length === 0 && filteredFinished.length === 0}
+			<div class="panel p-6 text-[var(--muted)]">No bags match “{search.trim()}”.</div>
+		{:else}
 		<div class="space-y-8">
 			<section>
 				<h2 class="display mb-3 text-2xl font-semibold">In progress</h2>
-				{#if data.inProgress.length === 0}
-					<p class="text-sm text-[var(--muted)]">Nothing brewing right now.</p>
+				{#if filteredInProgress.length === 0}
+					<p class="text-sm text-[var(--muted)]">
+						{search.trim() ? 'No in-progress bags match this search.' : 'Nothing brewing right now.'}
+					</p>
 				{:else}
 					<div class="stagger grid gap-3">
-						{#each data.inProgress as bean}
+						{#each filteredInProgress as bean}
 							<article class="panel p-5">
 								<div class="flex flex-wrap items-start justify-between gap-3">
 									<div>
@@ -155,11 +185,13 @@
 
 			<section>
 				<h2 class="display mb-3 text-2xl font-semibold">Finished · by ranking</h2>
-				{#if data.finished.length === 0}
-					<p class="text-sm text-[var(--muted)]">No finished bags yet.</p>
+				{#if filteredFinished.length === 0}
+					<p class="text-sm text-[var(--muted)]">
+						{search.trim() ? 'No finished bags match this search.' : 'No finished bags yet.'}
+					</p>
 				{:else}
 					<div class="stagger grid gap-3">
-						{#each data.finished as bean}
+						{#each filteredFinished as bean}
 							<article class="panel p-5">
 								<div class="flex flex-wrap items-start justify-between gap-3">
 									<div>
@@ -188,6 +220,7 @@
 				{/if}
 			</section>
 		</div>
+		{/if}
 	{/if}
 </section>
 
