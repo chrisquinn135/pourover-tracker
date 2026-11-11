@@ -37,7 +37,7 @@ npm run preview -- --port 3457 --host 127.0.0.1
 | Variable | Description |
 |---|---|
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Service account email |
-| `GOOGLE_PRIVATE_KEY` | Private key (`-----BEGIN PRIVATE KEY-----...`, `\n` escaped newlines OK) |
+| `GOOGLE_PRIVATE_KEY` | Service account private key PEM (escaped newlines OK) |
 | `GOOGLE_SHEET_ID` | Spreadsheet ID from the Sheet URL |
 
 On first write, the app creates **Beans** and **Logs** tabs with headers if they are missing.
