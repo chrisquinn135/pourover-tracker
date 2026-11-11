@@ -42,6 +42,10 @@ npm run preview -- --port 3457 --host 127.0.0.1
 
 On first write, the app creates **Beans** and **Logs** tabs with headers if they are missing.
 
+### Spreadsheet import
+
+The coffee history from `coffee-spreadsheet.xlsx` is bundled as seed data (24 bags, 6 recipe logs). When Google Sheets is connected, the first app load imports any missing seed bags/logs into your Sheet (matched by bag name + roaster). Local sample mode uses the same seed.
+
 ## Scripts
 
 - `npm run dev` — development server on port 3457
