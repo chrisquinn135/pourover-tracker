@@ -15,12 +15,14 @@
 		Pourover tracker
 	</a>
 
-	<nav class="flex gap-2 overflow-x-auto pb-1">
+	<nav class="flex flex-wrap gap-2">
 		{#each links as link}
 			{@const active = page.url.pathname === link.href}
 			<a
 				href={link.href}
-				class="btn whitespace-nowrap {active ? 'btn-primary' : 'btn-ghost'}"
+				class="btn px-3 py-2 text-sm whitespace-nowrap sm:px-[1.15rem] sm:py-[0.7rem] sm:text-base {active
+					? 'btn-primary'
+					: 'btn-ghost'}"
 				aria-current={active ? 'page' : undefined}
 			>
 				{link.label}
