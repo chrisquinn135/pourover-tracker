@@ -3,10 +3,13 @@
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
 	import NotesEditor from '#lib/components/NotesEditor.svelte';
+	import ConfirmModal from '#lib/components/ConfirmModal.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	let savingId = $state<string | null>(null);
+	let pendingDelete = $state<{ id: string; beanName: string } | null>(null);
+	let deleting = $state(false);
 
 	function onFilterChange(event: Event) {
 		const value = (event.currentTarget as HTMLSelectElement).value;
@@ -38,6 +41,21 @@
 			await invalidateAll();
 		} finally {
 			savingId = null;
+		}
+	}
+
+	async function confirmDeleteLog() {
+		if (!pendingDelete) return;
+		deleting = true;
+		try {
+			const res = await fetch(`/api/logs/${pendingDelete.id}`, { method: 'DELETE' });
+			if (!res.ok) throw new Error('Could not delete log');
+			pendingDelete = null;
+			await invalidateAll();
+		} catch (err) {
+			alert(err instanceof Error ? err.message : 'Could not delete log');
+		} finally {
+			deleting = false;
 		}
 	}
 </script>
@@ -112,8 +130,30 @@
 						saving={savingId === log.id}
 						onsave={(notes) => saveLogNotes(log.id, notes)}
 					/>
+					<div class="mt-4">
+						<button
+							class="btn btn-ghost"
+							type="button"
+							onclick={() => (pendingDelete = { id: log.id, beanName: log.beanName })}
+						>
+							Delete log
+						</button>
+					</div>
 				</article>
 			{/each}
 		</div>
 	{/if}
 </section>
+
+<ConfirmModal
+	open={pendingDelete !== null}
+	title="Delete this log?"
+	body={pendingDelete
+		? `Remove this brew log for “${pendingDelete.beanName}”? This can’t be undone.`
+		: ''}
+	busy={deleting}
+	oncancel={() => {
+		if (!deleting) pendingDelete = null;
+	}}
+	onconfirm={confirmDeleteLog}
+/>

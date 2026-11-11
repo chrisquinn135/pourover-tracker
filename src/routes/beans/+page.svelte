@@ -3,6 +3,7 @@
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
 	import NotesEditor from '#lib/components/NotesEditor.svelte';
+	import ConfirmModal from '#lib/components/ConfirmModal.svelte';
 	import type { Bean } from '#lib/types';
 	import type { PageProps } from './$types';
 
@@ -10,6 +11,8 @@
 	let savingId = $state<string | null>(null);
 	let importing = $state(false);
 	let importMessage = $state('');
+	let pendingDelete = $state<Bean | null>(null);
+	let deleting = $state(false);
 
 	async function importSeed() {
 		importing = true;
@@ -64,6 +67,21 @@
 			await invalidateAll();
 		} finally {
 			savingId = null;
+		}
+	}
+
+	async function confirmDeleteBag() {
+		if (!pendingDelete) return;
+		deleting = true;
+		try {
+			const res = await fetch(`/api/beans/${pendingDelete.id}`, { method: 'DELETE' });
+			if (!res.ok) throw new Error('Could not delete bag');
+			pendingDelete = null;
+			await invalidateAll();
+		} catch (err) {
+			alert(err instanceof Error ? err.message : 'Could not delete bag');
+		} finally {
+			deleting = false;
 		}
 	}
 </script>
@@ -125,6 +143,9 @@
 									<button class="btn btn-ghost" type="button" onclick={() => markFinished(bean)}>
 										Mark finished
 									</button>
+									<button class="btn btn-ghost" type="button" onclick={() => (pendingDelete = bean)}>
+										Delete
+									</button>
 								</div>
 							</article>
 						{/each}
@@ -155,8 +176,11 @@
 									saving={savingId === bean.id}
 									onsave={(notes) => saveBeanNotes(bean.id, notes)}
 								/>
-								<div class="mt-4">
+								<div class="mt-4 flex flex-wrap gap-2">
 									<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
+									<button class="btn btn-ghost" type="button" onclick={() => (pendingDelete = bean)}>
+										Delete
+									</button>
 								</div>
 							</article>
 						{/each}
@@ -166,3 +190,16 @@
 		</div>
 	{/if}
 </section>
+
+<ConfirmModal
+	open={pendingDelete !== null}
+	title="Delete this bag?"
+	body={pendingDelete
+		? `“${pendingDelete.bagName}” and all of its brew logs will be removed. This can’t be undone.`
+		: ''}
+	busy={deleting}
+	oncancel={() => {
+		if (!deleting) pendingDelete = null;
+	}}
+	onconfirm={confirmDeleteBag}
+/>

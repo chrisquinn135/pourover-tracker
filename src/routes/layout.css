@@ -191,6 +191,35 @@ a {
 	background: rgba(31, 107, 86, 0.06);
 }
 
+.btn-danger {
+	background: #8f2f2f;
+	color: white;
+}
+
+.btn-danger:hover {
+	background: #742424;
+}
+
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: grid;
+	place-items: center;
+	padding: 1rem;
+	background: rgba(24, 33, 29, 0.45);
+	backdrop-filter: blur(4px);
+}
+
+.modal-panel {
+	width: min(100%, 26rem);
+	border-radius: var(--radius);
+	border: 1px solid var(--line);
+	background: rgba(255, 255, 255, 0.96);
+	box-shadow: var(--shadow);
+	padding: 1.35rem 1.4rem 1.25rem;
+}
+
 .badge {
 	display: inline-flex;
 	align-items: center;

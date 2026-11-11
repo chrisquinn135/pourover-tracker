@@ -69,6 +69,13 @@ export const mockDb = {
 		return next;
 	},
 
+	async deleteBean(id: string): Promise<boolean> {
+		const before = store().beans.length;
+		store().beans = store().beans.filter((b) => b.id !== id);
+		store().logs = store().logs.filter((l) => l.beanId !== id);
+		return store().beans.length < before;
+	},
+
 	async listLogs(beanId?: string): Promise<BrewLog[]> {
 		const logs = store().logs.filter((l) => (beanId ? l.beanId === beanId : true));
 		return [...logs].sort((a, b) => b.brewedAt.localeCompare(a.brewedAt));
@@ -104,5 +111,11 @@ export const mockDb = {
 		};
 		store().logs[idx] = next;
 		return next;
+	},
+
+	async deleteLog(id: string): Promise<boolean> {
+		const before = store().logs.length;
+		store().logs = store().logs.filter((l) => l.id !== id);
+		return store().logs.length < before;
 	}
 };

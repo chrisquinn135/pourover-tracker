@@ -52,3 +52,10 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 	if (!bean) throw error(404, 'Bean not found');
 	return json({ bean });
 };
+
+export const DELETE: RequestHandler = async ({ params }) => {
+	const existing = await db.getBean(params.id);
+	if (!existing) throw error(404, 'Bean not found');
+	await db.deleteBean(params.id);
+	return json({ ok: true });
+};

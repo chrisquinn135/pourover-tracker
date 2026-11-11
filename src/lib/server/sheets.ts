@@ -374,6 +374,41 @@ export const db = {
 		return next;
 	},
 
+	async deleteBean(id: string): Promise<boolean> {
+		if (usingMockData()) return mockDb.deleteBean(id);
+		const sheets = await ensureReady();
+		const existingBeans = await readBeansRaw(sheets);
+		if (!existingBeans.some((b) => b.id === id)) return false;
+		const beans = existingBeans.filter((b) => b.id !== id);
+		const logs = (await readLogsRaw(sheets)).filter((l) => l.beanId !== id);
+		await sheets.spreadsheets.values.clear({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${BEANS_SHEET}!A2:P`
+		});
+		if (beans.length > 0) {
+			await sheets.spreadsheets.values.update({
+				spreadsheetId: env.GOOGLE_SHEET_ID!,
+				range: `${BEANS_SHEET}!A2`,
+				valueInputOption: 'RAW',
+				requestBody: { values: beans.map(beanToRow) }
+			});
+		}
+		await sheets.spreadsheets.values.clear({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${LOGS_SHEET}!A2:J`
+		});
+		if (logs.length > 0) {
+			await sheets.spreadsheets.values.update({
+				spreadsheetId: env.GOOGLE_SHEET_ID!,
+				range: `${LOGS_SHEET}!A2`,
+				valueInputOption: 'RAW',
+				requestBody: { values: logs.map(logToRow) }
+			});
+		}
+		invalidateCache();
+		return true;
+	},
+
 	async listLogs(beanId?: string): Promise<BrewLog[]> {
 		if (usingMockData()) return mockDb.listLogs(beanId);
 		const s = state();
@@ -440,5 +475,27 @@ export const db = {
 		});
 		invalidateCache();
 		return next;
+	},
+
+	async deleteLog(id: string): Promise<boolean> {
+		if (usingMockData()) return mockDb.deleteLog(id);
+		const sheets = await ensureReady();
+		const existing = await readLogsRaw(sheets);
+		if (!existing.some((l) => l.id === id)) return false;
+		const logs = existing.filter((l) => l.id !== id);
+		await sheets.spreadsheets.values.clear({
+			spreadsheetId: env.GOOGLE_SHEET_ID!,
+			range: `${LOGS_SHEET}!A2:J`
+		});
+		if (logs.length > 0) {
+			await sheets.spreadsheets.values.update({
+				spreadsheetId: env.GOOGLE_SHEET_ID!,
+				range: `${LOGS_SHEET}!A2`,
+				valueInputOption: 'RAW',
+				requestBody: { values: logs.map(logToRow) }
+			});
+		}
+		invalidateCache();
+		return true;
 	}
 };

@@ -30,3 +30,9 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 	if (!log) throw error(404, 'Log not found');
 	return json({ log });
 };
+
+export const DELETE: RequestHandler = async ({ params }) => {
+	const ok = await db.deleteLog(params.id);
+	if (!ok) throw error(404, 'Log not found');
+	return json({ ok: true });
+};
