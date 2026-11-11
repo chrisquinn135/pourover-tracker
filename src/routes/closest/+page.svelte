@@ -1,16 +1,16 @@
 <script lang="ts">
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
+	import { beanFieldSuggestions, BEAN_SIZES } from '#lib/suggestions';
 	import type { ClosestMatch } from '#lib/types';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
-	let bagName = $state('');
 	let country = $state('');
 	let region = $state('');
 	let roaster = $state('');
 	let farm = $state('');
-	let roastLevel = $state('light');
+	let roastLevel = $state('');
 	let variety = $state('');
 	let altitude = $state('');
 	let process = $state('');
@@ -20,9 +20,17 @@
 	let searching = $state(false);
 	let searched = $state(false);
 
+	let options = $derived(beanFieldSuggestions(data.beans));
+
 	async function search(event: Event) {
 		event.preventDefault();
 		error = '';
+		if (!roastLevel) {
+			error = 'Pick a roast level to rank similar bags.';
+			searched = false;
+			matches = [];
+			return;
+		}
 		searching = true;
 		searched = true;
 		try {
@@ -31,7 +39,6 @@
 				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({
 					query: {
-						bagName,
 						country,
 						region,
 						roaster,
@@ -62,14 +69,19 @@
 		if (level === 'medium') return 'badge-medium';
 		return 'badge-low';
 	}
+
+	function labelize(value: string) {
+		if (!value) return 'Unknown';
+		return value[0].toUpperCase() + value.slice(1);
+	}
 </script>
 
 <section class="animate-rise">
 	<div class="mb-5 max-w-2xl">
 		<h1 class="display text-3xl font-bold">Find closest bean</h1>
 		<p class="mt-1 text-[var(--muted)]">
-			Roast level is required. Scores normalize over fields both bags share, prefer finished bags
-			you’ve already brewed, and cap light↔dark pairs at 40.
+			Choose values from your bags. Roast level is required; everything else can stay Unknown.
+			Altitude is a number. Scores prefer finished bags you’ve already brewed.
 		</p>
 	</div>
 
@@ -77,20 +89,49 @@
 
 	<form class="panel grid gap-4 p-5 md:grid-cols-2 md:p-6" onsubmit={search}>
 		<div class="field">
-			<label for="bagName">Bag name</label>
-			<input id="bagName" bind:value={bagName} placeholder="New arrival" />
-		</div>
-		<div class="field">
 			<label for="roastLevel">Roast level *</label>
-			<select id="roastLevel" bind:value={roastLevel} required>
+			<select id="roastLevel" bind:value={roastLevel}>
+				<option value="">Unknown</option>
 				<option value="light">Light</option>
 				<option value="medium">Medium</option>
 				<option value="dark">Dark</option>
 			</select>
 		</div>
 		<div class="field">
+			<label for="roaster">Roaster</label>
+			<select id="roaster" bind:value={roaster}>
+				<option value="">Unknown</option>
+				{#each options.roasters as option}
+					<option value={option}>{option}</option>
+				{/each}
+			</select>
+		</div>
+		<div class="field">
 			<label for="country">Country</label>
-			<input id="country" bind:value={country} placeholder="Colombia" />
+			<select id="country" bind:value={country}>
+				<option value="">Unknown</option>
+				{#each options.countries as option}
+					<option value={option}>{option}</option>
+				{/each}
+			</select>
+		</div>
+		<div class="field">
+			<label for="farm">Farm</label>
+			<select id="farm" bind:value={farm}>
+				<option value="">Unknown</option>
+				{#each options.farms as option}
+					<option value={option}>{option}</option>
+				{/each}
+			</select>
+		</div>
+		<div class="field">
+			<label for="variety">Variety</label>
+			<select id="variety" bind:value={variety}>
+				<option value="">Unknown</option>
+				{#each options.varieties as option}
+					<option value={option}>{option}</option>
+				{/each}
+			</select>
 		</div>
 		<div class="field">
 			<label for="region">Region</label>
@@ -103,42 +144,34 @@
 			</select>
 		</div>
 		<div class="field">
-			<label for="roaster">Roaster</label>
-			<input id="roaster" bind:value={roaster} />
-		</div>
-		<div class="field">
-			<label for="farm">Farm</label>
-			<input id="farm" bind:value={farm} />
-		</div>
-		<div class="field">
 			<label for="process">Process</label>
 			<select id="process" bind:value={process}>
 				<option value="">Unknown</option>
-				<option value="washed">Washed</option>
-				<option value="anaerobic washed">Anaerobic washed</option>
-				<option value="honey">Honey</option>
-				<option value="pulped natural">Pulped natural</option>
-				<option value="natural">Natural</option>
-				<option value="anaerobic natural">Anaerobic natural</option>
-				<option value="carbonic maceration">Carbonic maceration</option>
+				{#each options.processes as option}
+					<option value={option}>{labelize(option)}</option>
+				{/each}
 			</select>
-		</div>
-		<div class="field">
-			<label for="variety">Variety</label>
-			<input id="variety" bind:value={variety} placeholder="Pink Bourbon" />
-		</div>
-		<div class="field">
-			<label for="altitude">Altitude</label>
-			<input id="altitude" bind:value={altitude} placeholder="1800" />
 		</div>
 		<div class="field">
 			<label for="beanSize">Bean size</label>
 			<select id="beanSize" bind:value={beanSize}>
 				<option value="">Unknown</option>
-				<option value="small">Small</option>
-				<option value="medium">Medium</option>
-				<option value="large">Large</option>
+				{#each BEAN_SIZES as size}
+					<option value={size}>{labelize(size)}</option>
+				{/each}
 			</select>
+		</div>
+		<div class="field">
+			<label for="altitude">Altitude (m)</label>
+			<input
+				id="altitude"
+				type="number"
+				min="0"
+				step="1"
+				bind:value={altitude}
+				placeholder="1800"
+				inputmode="numeric"
+			/>
 		</div>
 		<div class="md:col-span-2">
 			<button class="btn btn-primary" type="submit" disabled={searching}>
