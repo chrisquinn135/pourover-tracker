@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
+	import { formatTotalTime } from '#lib/suggestions';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -10,7 +11,8 @@
 	let grindSize = $state('');
 	let grinder = $state('');
 	let dripper = $state('');
-	let totalTime = $state('');
+	let minutes = $state('');
+	let seconds = $state('');
 	let rating = $state('');
 	let notes = $state('');
 	let error = $state('');
@@ -18,9 +20,7 @@
 
 	$effect(() => {
 		if (!beanId && data.beans.length > 0) {
-			const preferred =
-				data.beans.find((b) => b.status === 'in_progress') ?? data.beans[0];
-			beanId = preferred.id;
+			beanId = data.beans[0].id;
 		}
 	});
 
@@ -29,6 +29,15 @@
 		error = '';
 		saving = true;
 		try {
+			const totalTime = formatTotalTime(minutes, seconds);
+			if (minutes !== '' || seconds !== '') {
+				const m = Number(minutes || 0);
+				const s = Number(seconds || 0);
+				if (!Number.isFinite(m) || !Number.isFinite(s) || m < 0 || s < 0 || s >= 60) {
+					throw new Error('Enter a valid time (seconds 0–59)');
+				}
+			}
+
 			const res = await fetch('/api/logs', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
@@ -64,7 +73,9 @@
 
 	{#if data.beans.length === 0}
 		<div class="panel mt-5 p-6">
-			<p class="text-[var(--muted)]">Add a bean bag before logging a brew.</p>
+			<p class="text-[var(--muted)]">
+				No in-progress bags. Add a bean or reopen a bag before logging a brew.
+			</p>
 			<a class="btn btn-primary mt-4" href="/beans/new">Add a bean</a>
 		</div>
 	{:else}
@@ -73,18 +84,15 @@
 				<label for="beanId">Bag of beans</label>
 				<select id="beanId" bind:value={beanId} required>
 					{#each data.beans as bean}
-						<option value={bean.id}>
-							{bean.bagName}
-							{bean.status === 'in_progress' ? '(in progress)' : '(finished)'}
-						</option>
+						<option value={bean.id}>{bean.bagName}</option>
 					{/each}
 				</select>
 			</div>
 
 			<div class="grid gap-4 md:grid-cols-2">
 				<div class="field">
-					<label for="waterTemp">Water temp (°C)</label>
-					<input id="waterTemp" bind:value={waterTemp} placeholder="94" />
+					<label for="waterTemp">Water temp (°F)</label>
+					<input id="waterTemp" bind:value={waterTemp} placeholder="201" inputmode="decimal" />
 				</div>
 				<div class="field">
 					<label for="grindSize">Grind size</label>
@@ -92,15 +100,63 @@
 				</div>
 				<div class="field">
 					<label for="grinder">Grinder</label>
-					<input id="grinder" bind:value={grinder} placeholder="ZP6" />
+					<input
+						id="grinder"
+						list="grinder-options"
+						bind:value={grinder}
+						placeholder="ZP6"
+						autocomplete="off"
+					/>
+					<datalist id="grinder-options">
+						{#each data.suggestions.grinders as option}
+							<option value={option}></option>
+						{/each}
+					</datalist>
 				</div>
 				<div class="field">
 					<label for="dripper">Dripper</label>
-					<input id="dripper" bind:value={dripper} placeholder="V60" />
+					<input
+						id="dripper"
+						list="dripper-options"
+						bind:value={dripper}
+						placeholder="V60"
+						autocomplete="off"
+					/>
+					<datalist id="dripper-options">
+						{#each data.suggestions.drippers as option}
+							<option value={option}></option>
+						{/each}
+					</datalist>
 				</div>
-				<div class="field">
-					<label for="totalTime">Total time</label>
-					<input id="totalTime" bind:value={totalTime} placeholder="2:45" />
+				<div class="field md:col-span-2">
+					<span class="text-xs font-semibold tracking-[0.04em] text-[var(--muted)] uppercase"
+						>Total time</span
+					>
+					<div class="mt-2 grid grid-cols-2 gap-3">
+						<div class="field">
+							<label for="minutes">Minutes</label>
+							<input
+								id="minutes"
+								type="number"
+								min="0"
+								step="1"
+								bind:value={minutes}
+								placeholder="2"
+							/>
+						</div>
+						<div class="field">
+							<label for="seconds">Seconds</label>
+							<input
+								id="seconds"
+								type="number"
+								min="0"
+								max="59"
+								step="1"
+								bind:value={seconds}
+								placeholder="45"
+							/>
+						</div>
+					</div>
 				</div>
 				<div class="field">
 					<label for="rating">Rating / 10</label>

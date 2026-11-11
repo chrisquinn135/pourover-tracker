@@ -104,7 +104,7 @@ function seedLogs(): BrewLog[] {
 		{
 			id: 'log-1',
 			beanId: 'bean-eth-gesha',
-			waterTemp: '94',
+			waterTemp: '201',
 			grindSize: '20',
 			grinder: 'ZP6',
 			dripper: 'V60',
@@ -116,7 +116,7 @@ function seedLogs(): BrewLog[] {
 		{
 			id: 'log-2',
 			beanId: 'bean-col-pink',
-			waterTemp: '93',
+			waterTemp: '199',
 			grindSize: '19',
 			grinder: 'ZP6',
 			dripper: 'April',
@@ -128,7 +128,7 @@ function seedLogs(): BrewLog[] {
 		{
 			id: 'log-3',
 			beanId: 'bean-kenya-aa',
-			waterTemp: '96',
+			waterTemp: '205',
 			grindSize: '21',
 			grinder: 'Fellow Ode',
 			dripper: 'V60',

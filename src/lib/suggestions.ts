@@ -1,4 +1,4 @@
-import type { Bean } from './types';
+import type { Bean, BrewLog } from './types';
 
 const KNOWN_PROCESSES = [
 	'washed',
@@ -43,4 +43,22 @@ export function beanFieldSuggestions(beans: Bean[]) {
 		varieties: uniqueSorted(varietyParts),
 		altitudes: uniqueSorted(beans.map((b) => b.altitude))
 	};
+}
+
+export function logFieldSuggestions(logs: BrewLog[]) {
+	return {
+		grinders: uniqueSorted(logs.map((l) => l.grinder)),
+		drippers: uniqueSorted(logs.map((l) => l.dripper))
+	};
+}
+
+export function formatTotalTime(minutes: string, seconds: string): string {
+	const m = minutes.trim() === '' ? 0 : Number(minutes);
+	const s = seconds.trim() === '' ? 0 : Number(seconds);
+	if (!Number.isFinite(m) || !Number.isFinite(s) || m < 0 || s < 0) {
+		return '';
+	}
+	const wholeMinutes = Math.floor(m);
+	const wholeSeconds = Math.floor(s);
+	return `${wholeMinutes}:${String(wholeSeconds).padStart(2, '0')}`;
 }

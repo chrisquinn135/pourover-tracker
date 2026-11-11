@@ -71,7 +71,7 @@
 					<dl class="mt-4 grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
 						<div>
 							<dt class="text-[var(--muted)]">Temp</dt>
-							<dd class="font-medium">{log.waterTemp || '—'}°C</dd>
+							<dd class="font-medium">{log.waterTemp || '—'}°F</dd>
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Grind</dt>
