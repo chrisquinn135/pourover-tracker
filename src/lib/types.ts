@@ -60,9 +60,3 @@ export interface ClosestMatch {
 	logCount: number;
 	boostedScore: number;
 }
-
-export interface ClosestRequest {
-	query: Partial<Bean>;
-	excludeId?: string;
-	limit?: number;
-}

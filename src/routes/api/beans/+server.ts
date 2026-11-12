@@ -40,11 +40,6 @@ function parseBeanBody(body: Record<string, unknown>): BeanInput {
 	});
 }
 
-export const GET: RequestHandler = async () => {
-	const beans = await db.listBeans();
-	return json({ beans, usingMockData: db.usingMockData() });
-};
-
 export const POST: RequestHandler = async ({ request }) => {
 	const body = (await request.json()) as Record<string, unknown>;
 	const input = parseBeanBody(body);

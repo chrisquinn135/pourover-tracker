@@ -2,21 +2,6 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '#lib/server/sheets';
 import { normalizeLogForStorage } from '#lib/text';
-import type { BrewLogInput } from '#lib/types';
-
-export const GET: RequestHandler = async ({ url }) => {
-	const beanId = url.searchParams.get('beanId') ?? undefined;
-	const [logs, beans] = await Promise.all([db.listLogs(beanId || undefined), db.listBeans()]);
-	const beanMap = Object.fromEntries(beans.map((b) => [b.id, b]));
-	return json({
-		logs: logs.map((log) => ({
-			...log,
-			beanName: beanMap[log.beanId]?.bagName ?? 'Unknown bag'
-		})),
-		beans,
-		usingMockData: db.usingMockData()
-	});
-};
 
 export const POST: RequestHandler = async ({ request }) => {
 	const body = (await request.json()) as Record<string, unknown>;

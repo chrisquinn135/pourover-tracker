@@ -11,7 +11,6 @@ const KNOWN_PROCESSES = [
 ] as const;
 
 export const BEAN_SIZES = ['small', 'medium', 'large'] as const;
-export type BeanSize = (typeof BEAN_SIZES)[number];
 
 function uniqueSorted(values: string[]): string[] {
 	const seen = new Set<string>();

@@ -2,13 +2,11 @@
 	let {
 		title,
 		body,
-		href,
 		cta,
 		onclick
 	}: {
 		title: string;
 		body: string;
-		href?: string;
 		cta?: string;
 		onclick?: () => void;
 	} = $props();
@@ -19,7 +17,5 @@
 	<p class="mx-auto mt-2 max-w-md text-[var(--muted)]">{body}</p>
 	{#if cta && onclick}
 		<button class="btn btn-primary mt-5" type="button" {onclick}>{cta}</button>
-	{:else if href && cta}
-		<a class="btn btn-primary mt-5" href={href}>{cta}</a>
 	{/if}
 </div>

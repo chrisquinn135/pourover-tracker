@@ -4,12 +4,6 @@ import { db } from '#lib/server/sheets';
 import { normalizeBeanPatch } from '#lib/text';
 import type { BeanInput, BeanStatus, Region, RoastLevel } from '#lib/types';
 
-export const GET: RequestHandler = async ({ params }) => {
-	const bean = await db.getBean(params.id);
-	if (!bean) throw error(404, 'Bean not found');
-	return json({ bean, usingMockData: db.usingMockData() });
-};
-
 export const PATCH: RequestHandler = async ({ params, request }) => {
 	const body = (await request.json()) as Record<string, unknown>;
 	const patch: Partial<BeanInput> = {};

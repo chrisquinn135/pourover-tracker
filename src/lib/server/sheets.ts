@@ -55,7 +55,7 @@ function state() {
 	return g.__pouroverSheets;
 }
 
-export function usingMockData(): boolean {
+function usingMockData(): boolean {
 	return !(
 		env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
 		env.GOOGLE_PRIVATE_KEY &&

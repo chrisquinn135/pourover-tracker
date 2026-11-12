@@ -41,10 +41,11 @@ On first write, the app creates **Beans** and **Logs** tabs with headers if they
 
 ### Spreadsheet import
 
-The coffee history from `coffee-spreadsheet.xlsx` is bundled as local sample data. To load history into Google Sheets, use the Apps Script / CSV importer under `scripts/` and `static/import/`.
+Sample bags/logs ship in `src/lib/server/seed-from-spreadsheet.json` for local mode. To load history into Google Sheets, use the Apps Script / CSV importer under `scripts/` and `static/import/`.
 
 ## Scripts
 
 - `npm run dev` — development server on port 3457
 - `npm run build` — production build
 - `npm run check` — TypeScript / Svelte check
+- `npm test` — similarity unit tests

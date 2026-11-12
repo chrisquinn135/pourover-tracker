@@ -53,11 +53,11 @@ const COUNTRY_REGION: Record<string, Region> = {
 	spain: 'europe'
 };
 
-export function normalizeCountry(country: string): string {
+function normalizeCountry(country: string): string {
 	return country.trim().toLowerCase();
 }
 
-export function regionFromCountry(country: string): Region | '' {
+function regionFromCountry(country: string): Region | '' {
 	const key = normalizeCountry(country);
 	return COUNTRY_REGION[key] ?? '';
 }
