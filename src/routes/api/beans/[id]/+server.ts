@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '#lib/server/sheets';
+import { normalizeBeanPatch } from '#lib/text';
 import type { BeanInput, BeanStatus, Region, RoastLevel } from '#lib/types';
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -48,7 +49,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 		patch.ranking = ranking;
 	}
 
-	const bean = await db.updateBean(params.id, patch);
+	const bean = await db.updateBean(params.id, normalizeBeanPatch(patch));
 	if (!bean) throw error(404, 'Bean not found');
 	return json({ bean });
 };

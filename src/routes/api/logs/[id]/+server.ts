@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '#lib/server/sheets';
+import { normalizeLogPatch } from '#lib/text';
 import type { BrewLogInput } from '#lib/types';
 
 export const PATCH: RequestHandler = async ({ params, request }) => {
@@ -26,7 +27,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 	}
 	if ('beanId' in body) patch.beanId = String(body.beanId ?? '').trim();
 
-	const log = await db.updateLog(params.id, patch);
+	const log = await db.updateLog(params.id, normalizeLogPatch(patch));
 	if (!log) throw error(404, 'Log not found');
 	return json({ log });
 };

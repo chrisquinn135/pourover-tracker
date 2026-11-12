@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '#lib/server/sheets';
+import { normalizeLogForStorage } from '#lib/text';
 import type { BrewLogInput } from '#lib/types';
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -26,7 +27,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	if (!bean) throw error(400, 'Unknown beanId');
 
 	const ratingRaw = body.rating;
-	const input: BrewLogInput = {
+	const input = normalizeLogForStorage({
 		beanId,
 		waterTemp: String(body.waterTemp ?? '').trim(),
 		grindSize: String(body.grindSize ?? '').trim(),
@@ -38,7 +39,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				? null
 				: Number(ratingRaw),
 		notes: String(body.notes ?? '').trim()
-	};
+	});
 
 	const log = await db.createLog(input);
 	return json({ log }, { status: 201 });

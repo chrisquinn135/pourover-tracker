@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '#lib/server/sheets';
+import { normalizeBeanForStorage } from '#lib/text';
 import type { BeanInput, BeanStatus, Region, RoastLevel } from '#lib/types';
 
 function parseBeanBody(body: Record<string, unknown>): BeanInput {
@@ -22,7 +23,7 @@ function parseBeanBody(body: Record<string, unknown>): BeanInput {
 		throw error(400, 'Finished bags require a ranking out of 10');
 	}
 
-	return {
+	return normalizeBeanForStorage({
 		bagName,
 		country,
 		region: (String(body.region ?? '') as Region | '') || '',
@@ -36,7 +37,7 @@ function parseBeanBody(body: Record<string, unknown>): BeanInput {
 		notes: String(body.notes ?? '').trim(),
 		status,
 		ranking: status === 'finished' ? ranking : null
-	};
+	});
 }
 
 export const GET: RequestHandler = async () => {
