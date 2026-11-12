@@ -214,7 +214,6 @@
 										onsave={(notes) => saveBeanNotes(bean.id, notes)}
 									/>
 									<div class="action-row mt-4">
-										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in Feed</a>
 										<a class="btn btn-ghost" href={`/?beanId=${bean.id}&add=1`}>Log a Brew</a>
 										<button
 											class="btn btn-ghost"
@@ -233,17 +232,18 @@
 										<button
 											class="btn btn-ghost"
 											type="button"
-											onclick={() => (pendingFinish = bean)}
-										>
-											Mark Finished
-										</button>
-										<button
-											class="btn btn-ghost"
-											type="button"
 											onclick={() => (pendingDelete = bean)}
 										>
 											Delete
 										</button>
+										<button
+											class="btn btn-ghost"
+											type="button"
+											onclick={() => (pendingFinish = bean)}
+										>
+											Mark Finished
+										</button>
+										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in Feed</a>
 									</div>
 								</article>
 							{/each}
@@ -285,7 +285,6 @@
 										onsave={(notes) => saveBeanNotes(bean.id, notes)}
 									/>
 									<div class="action-row mt-4">
-										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in Feed</a>
 										<button
 											class="btn btn-ghost"
 											type="button"
@@ -307,6 +306,7 @@
 										>
 											Delete
 										</button>
+										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in Feed</a>
 									</div>
 								</article>
 							{/each}
