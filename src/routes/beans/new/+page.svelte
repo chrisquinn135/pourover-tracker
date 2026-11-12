@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
-	import { BEAN_SIZES } from '#lib/suggestions';
+	import { BEAN_SIZES, beanFieldSuggestions } from '#lib/suggestions';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+	let suggestions = $derived(beanFieldSuggestions(data.beans));
 
 	let bagName = $state('');
 	let country = $state('');
@@ -50,6 +51,7 @@
 				const payload = await res.json().catch(() => ({}));
 				throw new Error(payload.message || 'Could not save bean');
 			}
+			await invalidateAll();
 			await goto('/beans');
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Could not save bean';
@@ -82,7 +84,7 @@
 					autocomplete="off"
 				/>
 				<datalist id="country-options">
-					{#each data.suggestions.countries as option}
+					{#each suggestions.countries as option}
 						<option value={option}></option>
 					{/each}
 				</datalist>
@@ -107,7 +109,7 @@
 					autocomplete="off"
 				/>
 				<datalist id="roaster-options">
-					{#each data.suggestions.roasters as option}
+					{#each suggestions.roasters as option}
 						<option value={option}></option>
 					{/each}
 				</datalist>
@@ -121,7 +123,7 @@
 					autocomplete="off"
 				/>
 				<datalist id="farm-options">
-					{#each data.suggestions.farms as option}
+					{#each suggestions.farms as option}
 						<option value={option}></option>
 					{/each}
 				</datalist>
@@ -144,7 +146,7 @@
 					autocomplete="off"
 				/>
 				<datalist id="process-options">
-					{#each data.suggestions.processes as option}
+					{#each suggestions.processes as option}
 						<option value={option}></option>
 					{/each}
 				</datalist>
@@ -158,7 +160,7 @@
 					autocomplete="off"
 				/>
 				<datalist id="variety-options">
-					{#each data.suggestions.varieties as option}
+					{#each suggestions.varieties as option}
 						<option value={option}></option>
 					{/each}
 				</datalist>
@@ -172,7 +174,7 @@
 					autocomplete="off"
 				/>
 				<datalist id="altitude-options">
-					{#each data.suggestions.altitudes as option}
+					{#each suggestions.altitudes as option}
 						<option value={option}></option>
 					{/each}
 				</datalist>

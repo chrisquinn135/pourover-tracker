@@ -23,8 +23,20 @@
 		);
 	}
 
-	let filteredInProgress = $derived(data.inProgress.filter((b) => matchesSearch(b, search)));
-	let filteredFinished = $derived(data.finished.filter((b) => matchesSearch(b, search)));
+	let inProgress = $derived(
+		data.beans
+			.filter((b) => b.status === 'in_progress')
+			.sort((a, b) => a.bagName.localeCompare(b.bagName))
+	);
+	let finished = $derived(
+		data.beans
+			.filter((b) => b.status === 'finished')
+			.sort(
+				(a, b) => (b.ranking ?? -1) - (a.ranking ?? -1) || a.bagName.localeCompare(b.bagName)
+			)
+	);
+	let filteredInProgress = $derived(inProgress.filter((b) => matchesSearch(b, search)));
+	let filteredFinished = $derived(finished.filter((b) => matchesSearch(b, search)));
 
 	async function importSeed() {
 		importing = true;
@@ -117,7 +129,7 @@
 		<p class="mb-5 text-sm text-[var(--muted)]" role="status">{importMessage}</p>
 	{/if}
 
-	{#if data.inProgress.length === 0 && data.finished.length === 0}
+	{#if inProgress.length === 0 && finished.length === 0}
 		<EmptyState
 			title="No bags yet"
 			body="Add your first bag to start logging pours against it."

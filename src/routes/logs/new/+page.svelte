@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
-	import { formatTotalTime } from '#lib/suggestions';
+	import { formatTotalTime, logFieldSuggestions } from '#lib/suggestions';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -18,9 +18,19 @@
 	let error = $state('');
 	let saving = $state(false);
 
+	let inProgressBeans = $derived(
+		data.beans
+			.filter((b) => b.status === 'in_progress')
+			.sort((a, b) => a.bagName.localeCompare(b.bagName))
+	);
+	let suggestions = $derived(logFieldSuggestions(data.logs));
+
 	$effect(() => {
-		if (!beanId && data.beans.length > 0) {
-			beanId = data.beans[0].id;
+		if (!beanId && inProgressBeans.length > 0) {
+			beanId = inProgressBeans[0].id;
+		}
+		if (beanId && !inProgressBeans.some((b) => b.id === beanId)) {
+			beanId = inProgressBeans[0]?.id ?? '';
 		}
 	});
 
@@ -56,6 +66,7 @@
 				const payload = await res.json().catch(() => ({}));
 				throw new Error(payload.message || 'Could not save log');
 			}
+			await invalidateAll();
 			await goto(`/?beanId=${encodeURIComponent(beanId)}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Could not save log';
@@ -71,7 +82,7 @@
 
 	<SampleBanner show={data.usingMockData} />
 
-	{#if data.beans.length === 0}
+	{#if inProgressBeans.length === 0}
 		<div class="panel mt-5 p-6">
 			<p class="text-[var(--muted)]">
 				No in-progress bags. Add a bean or reopen a bag before logging a brew.
@@ -83,7 +94,7 @@
 			<div class="field">
 				<label for="beanId">Bag of beans</label>
 				<select id="beanId" bind:value={beanId} required>
-					{#each data.beans as bean}
+					{#each inProgressBeans as bean}
 						<option value={bean.id}>{bean.bagName}</option>
 					{/each}
 				</select>
@@ -107,7 +118,7 @@
 						autocomplete="off"
 					/>
 					<datalist id="grinder-options">
-						{#each data.suggestions.grinders as option}
+						{#each suggestions.grinders as option}
 							<option value={option}></option>
 						{/each}
 					</datalist>
@@ -121,7 +132,7 @@
 						autocomplete="off"
 					/>
 					<datalist id="dripper-options">
-						{#each data.suggestions.drippers as option}
+						{#each suggestions.drippers as option}
 							<option value={option}></option>
 						{/each}
 					</datalist>

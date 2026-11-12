@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
 	import NotesEditor from '#lib/components/NotesEditor.svelte';
@@ -10,12 +10,15 @@
 	let savingId = $state<string | null>(null);
 	let pendingDelete = $state<{ id: string; beanName: string } | null>(null);
 	let deleting = $state(false);
+	let beanFilter = $state('');
 
-	function onFilterChange(event: Event) {
-		const value = (event.currentTarget as HTMLSelectElement).value;
-		const qs = value ? `?beanId=${encodeURIComponent(value)}` : '';
-		goto(`/${qs}`);
-	}
+	let beanMap = $derived(Object.fromEntries(data.beans.map((b) => [b.id, b])));
+	let feedLogs = $derived(
+		(beanFilter ? data.logs.filter((l) => l.beanId === beanFilter) : data.logs).map((log) => ({
+			...log,
+			beanName: beanMap[log.beanId]?.bagName ?? 'Unknown bag'
+		}))
+	);
 
 	function formatWhen(iso: string) {
 		try {
@@ -66,7 +69,7 @@
 			<h1 class="display text-3xl font-bold">Feed</h1>
 			<p class="mt-1 text-[var(--muted)]">Every pour, newest first.</p>
 		</div>
-		<a class="btn btn-primary" href="/logs/new">Add log</a>
+		<a class="btn btn-primary" href="/logs/new" data-sveltekit-preload-data="hover">Add log</a>
 	</div>
 
 	<SampleBanner show={data.usingMockData} />
@@ -74,7 +77,7 @@
 	<div class="panel mb-5 p-4">
 		<div class="field max-w-sm">
 			<label for="beanFilter">Bag</label>
-			<select id="beanFilter" value={data.beanId} onchange={onFilterChange}>
+			<select id="beanFilter" bind:value={beanFilter}>
 				<option value="">All bags</option>
 				{#each data.beans as bean}
 					<option value={bean.id}>{bean.bagName}</option>
@@ -83,7 +86,7 @@
 		</div>
 	</div>
 
-	{#if data.feedLogs.length === 0}
+	{#if feedLogs.length === 0}
 		<EmptyState
 			title="No brews yet"
 			body="Log your first pourover to start building your feed."
@@ -92,7 +95,7 @@
 		/>
 	{:else}
 		<div class="stagger space-y-3">
-			{#each data.feedLogs as log}
+			{#each feedLogs as log}
 				<article class="panel p-5">
 					<div class="flex flex-wrap items-start justify-between gap-3">
 						<div>

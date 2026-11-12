@@ -23,6 +23,7 @@
 			{@const active = page.url.pathname === link.href}
 			<a
 				href={link.href}
+				data-sveltekit-preload-data="hover"
 				class="btn w-full justify-center px-3 py-2 text-center text-sm {active
 					? 'btn-primary'
 					: 'btn-ghost'}"
