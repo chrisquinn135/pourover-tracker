@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
@@ -85,7 +85,7 @@
 				body: JSON.stringify({ notes })
 			});
 			if (!res.ok) throw new Error('Could not save notes');
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			savingId = null;
 		}
@@ -98,7 +98,7 @@
 			const res = await fetch(`/api/logs/${pendingDelete.id}`, { method: 'DELETE' });
 			if (!res.ok) throw new Error('Could not delete log');
 			pendingDelete = null;
-			await invalidateAll();
+			await refreshAll();
 		} catch (err) {
 			alert(err instanceof Error ? err.message : 'Could not delete log');
 		} finally {
@@ -109,7 +109,7 @@
 	async function onLogSaved(beanId: string) {
 		beanFilter = beanId;
 		await syncFeedUrl(beanId, false);
-		await invalidateAll();
+		await refreshAll();
 	}
 </script>
 

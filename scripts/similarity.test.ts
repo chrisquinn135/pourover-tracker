@@ -1,4 +1,5 @@
 import { findClosestBeans, parseAltitudeMeters, scoreBeans } from '../src/lib/similarity';
+import { formatTotalTime } from '../src/lib/suggestions';
 import type { Bean } from '../src/lib/types';
 
 function bean(partial: Partial<Bean> & Pick<Bean, 'id' | 'bagName'>): Bean {
@@ -95,6 +96,15 @@ test('prefers finished with logs via boost', () => {
 		new Map([['done', 2]])
 	);
 	assert(matches[0].bean.id === 'done', 'finished+logs should rank first');
+});
+
+test('formatTotalTime leaves blank time empty', () => {
+	assert(formatTotalTime(null, null) === '', 'nulls stay blank');
+	assert(formatTotalTime('', '') === '', 'empty strings stay blank');
+	assert(formatTotalTime(3, 45) === '3:45', 'numbers format');
+	assert(formatTotalTime('2', '5') === '2:05', 'strings format');
+	assert(formatTotalTime(0, 0) === '0:00', 'explicit zeros format');
+	assert(formatTotalTime(4, null) === '4:00', 'missing seconds become zero');
 });
 
 let failed = 0;

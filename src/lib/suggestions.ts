@@ -51,13 +51,17 @@ export function logFieldSuggestions(logs: BrewLog[]) {
 	};
 }
 
-function parseTimePart(value: string | number | null | undefined): number | null {
-	if (value === null || value === undefined) return 0;
-	if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+type ParsedTimePart = { empty: true } | { empty: false; value: number } | { empty: false; value: null };
+
+function parseTimePart(value: string | number | null | undefined): ParsedTimePart {
+	if (value === null || value === undefined) return { empty: true };
+	if (typeof value === 'number') {
+		return Number.isFinite(value) ? { empty: false, value } : { empty: false, value: null };
+	}
 	const trimmed = value.trim();
-	if (trimmed === '') return 0;
+	if (trimmed === '') return { empty: true };
 	const n = Number(trimmed);
-	return Number.isFinite(n) ? n : null;
+	return Number.isFinite(n) ? { empty: false, value: n } : { empty: false, value: null };
 }
 
 /** Accepts string or number — Svelte binds type=number inputs as number|null. */
@@ -67,10 +71,14 @@ export function formatTotalTime(
 ): string {
 	const m = parseTimePart(minutes);
 	const s = parseTimePart(seconds);
-	if (m === null || s === null || m < 0 || s < 0) {
+	if (m.empty && s.empty) return '';
+
+	const mValue = m.empty ? 0 : m.value;
+	const sValue = s.empty ? 0 : s.value;
+	if (mValue === null || sValue === null || mValue < 0 || sValue < 0) {
 		return '';
 	}
-	const wholeMinutes = Math.floor(m);
-	const wholeSeconds = Math.floor(s);
+	const wholeMinutes = Math.floor(mValue);
+	const wholeSeconds = Math.floor(sValue);
 	return `${wholeMinutes}:${String(wholeSeconds).padStart(2, '0')}`;
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
@@ -86,7 +86,7 @@
 			});
 			if (!res.ok) throw new Error('Could not update bag');
 			pendingFinish = null;
-			await invalidateAll();
+			await refreshAll();
 		} catch (err) {
 			alert(err instanceof Error ? err.message : 'Could not update bag');
 		} finally {
@@ -103,7 +103,7 @@
 				body: JSON.stringify({ notes })
 			});
 			if (!res.ok) throw new Error('Could not save notes');
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			savingId = null;
 		}
@@ -116,7 +116,7 @@
 			const res = await fetch(`/api/beans/${pendingDelete.id}`, { method: 'DELETE' });
 			if (!res.ok) throw new Error('Could not delete bag');
 			pendingDelete = null;
-			await invalidateAll();
+			await refreshAll();
 		} catch (err) {
 			alert(err instanceof Error ? err.message : 'Could not delete bag');
 		} finally {
@@ -126,7 +126,7 @@
 
 	async function onBeanSaved() {
 		await syncBagsUrl(false);
-		await invalidateAll();
+		await refreshAll();
 	}
 </script>
 
