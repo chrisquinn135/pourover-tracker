@@ -36,32 +36,33 @@
 </script>
 
 <div class="mt-4">
-	<div class="mb-2 flex items-center justify-between gap-2">
+	<div class="mb-2 flex flex-wrap items-center justify-between gap-2">
 		<p class="text-xs font-semibold tracking-[0.04em] text-[var(--muted)] uppercase">Notes</p>
 		{#if !editing}
-			<button class="btn btn-ghost !px-3 !py-1 text-sm" type="button" onclick={startEdit}>
+			<button class="btn btn-ghost px-3 text-sm" type="button" onclick={startEdit}>
 				{notes ? 'Edit notes' : 'Add notes'}
 			</button>
 		{/if}
 	</div>
 
 	{#if editing}
-		<textarea
-			class="w-full rounded-xl border border-[var(--line)] bg-white/90 px-3 py-2 text-sm"
-			rows="4"
-			bind:value={draft}
-		></textarea>
+		<div class="field">
+			<label class="sr-only" for="notes-draft">Notes</label>
+			<textarea id="notes-draft" rows="4" bind:value={draft}></textarea>
+		</div>
 		{#if error}
 			<p class="mt-2 text-sm text-red-700" role="alert">{error}</p>
 		{/if}
-		<div class="mt-2 flex flex-wrap gap-2">
-			<button class="btn btn-primary" type="button" disabled={saving} onclick={save}>
+		<div class="mt-2 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
+			<button class="btn btn-primary btn-block btn-block-sm" type="button" disabled={saving} onclick={save}>
 				{saving ? 'Saving…' : 'Save notes'}
 			</button>
-			<button class="btn btn-ghost" type="button" disabled={saving} onclick={cancel}>Cancel</button>
+			<button class="btn btn-ghost btn-block btn-block-sm" type="button" disabled={saving} onclick={cancel}>
+				Cancel
+			</button>
 		</div>
 	{:else if notes}
-		<p class="text-sm leading-relaxed whitespace-pre-wrap text-[var(--ink)]">{notes}</p>
+		<p class="text-sm leading-relaxed break-words whitespace-pre-wrap text-[var(--ink)]">{notes}</p>
 	{:else}
 		<p class="text-sm text-[var(--muted)]">No notes yet.</p>
 	{/if}

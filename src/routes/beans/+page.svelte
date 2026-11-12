@@ -4,6 +4,7 @@
 	import EmptyState from '#lib/components/EmptyState.svelte';
 	import NotesEditor from '#lib/components/NotesEditor.svelte';
 	import ConfirmModal from '#lib/components/ConfirmModal.svelte';
+	import RankModal from '#lib/components/RankModal.svelte';
 	import type { Bean } from '#lib/types';
 	import type { PageProps } from './$types';
 
@@ -13,6 +14,8 @@
 	let importMessage = $state('');
 	let pendingDelete = $state<Bean | null>(null);
 	let deleting = $state(false);
+	let pendingFinish = $state<Bean | null>(null);
+	let finishing = $state(false);
 	let search = $state('');
 
 	function matchesSearch(bean: Bean, query: string) {
@@ -59,24 +62,23 @@
 		}
 	}
 
-	async function markFinished(bean: Bean) {
-		const rankingRaw = prompt(`Rank ${bean.bagName} out of 10`, bean.ranking?.toString() ?? '8');
-		if (rankingRaw === null) return;
-		const ranking = Number(rankingRaw);
-		if (Number.isNaN(ranking) || ranking < 0 || ranking > 10) {
-			alert('Enter a ranking from 0 to 10');
-			return;
+	async function confirmFinish(ranking: number) {
+		if (!pendingFinish) return;
+		finishing = true;
+		try {
+			const res = await fetch(`/api/beans/${pendingFinish.id}`, {
+				method: 'PATCH',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ status: 'finished', ranking })
+			});
+			if (!res.ok) throw new Error('Could not update bag');
+			pendingFinish = null;
+			await invalidateAll();
+		} catch (err) {
+			alert(err instanceof Error ? err.message : 'Could not update bag');
+		} finally {
+			finishing = false;
 		}
-		const res = await fetch(`/api/beans/${bean.id}`, {
-			method: 'PATCH',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ status: 'finished', ranking })
-		});
-		if (!res.ok) {
-			alert('Could not update bag');
-			return;
-		}
-		await invalidateAll();
 	}
 
 	async function saveBeanNotes(id: string, notes: string) {
@@ -111,12 +113,12 @@
 </script>
 
 <section class="animate-rise">
-	<div class="mb-5 flex flex-wrap items-end justify-between gap-4">
-		<div>
+	<div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+		<div class="min-w-0">
 			<h1 class="display text-3xl font-bold">Bags</h1>
 			<p class="mt-1 text-[var(--muted)]">In progress and finished, kept separate.</p>
 		</div>
-		<div class="flex flex-wrap gap-2">
+		<div class="action-row w-full sm:w-auto">
 			<button class="btn btn-ghost" type="button" disabled={importing} onclick={importSeed}>
 				{importing ? 'Importing…' : 'Sync seed to Sheets'}
 			</button>
@@ -178,10 +180,14 @@
 									saving={savingId === bean.id}
 									onsave={(notes) => saveBeanNotes(bean.id, notes)}
 								/>
-								<div class="mt-4 flex flex-wrap gap-2">
+								<div class="action-row mt-4">
 									<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
 									<a class="btn btn-ghost" href={`/logs/new`}>Log a brew</a>
-									<button class="btn btn-ghost" type="button" onclick={() => markFinished(bean)}>
+									<button
+										class="btn btn-ghost"
+										type="button"
+										onclick={() => (pendingFinish = bean)}
+									>
 										Mark finished
 									</button>
 									<button class="btn btn-ghost" type="button" onclick={() => (pendingDelete = bean)}>
@@ -219,7 +225,7 @@
 									saving={savingId === bean.id}
 									onsave={(notes) => saveBeanNotes(bean.id, notes)}
 								/>
-								<div class="mt-4 flex flex-wrap gap-2">
+								<div class="action-row mt-4">
 									<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
 									<button class="btn btn-ghost" type="button" onclick={() => (pendingDelete = bean)}>
 										Delete
@@ -246,4 +252,15 @@
 		if (!deleting) pendingDelete = null;
 	}}
 	onconfirm={confirmDeleteBag}
+/>
+
+<RankModal
+	open={pendingFinish !== null}
+	bagName={pendingFinish?.bagName ?? ''}
+	initial={pendingFinish?.ranking?.toString() ?? '8'}
+	busy={finishing}
+	oncancel={() => {
+		if (!finishing) pendingFinish = null;
+	}}
+	onconfirm={confirmFinish}
 />

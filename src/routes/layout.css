@@ -126,22 +126,31 @@ a {
 .field select,
 .field textarea {
 	width: 100%;
+	min-height: 2.75rem;
 	border-radius: 12px;
 	border: 1px solid var(--line);
 	background: rgba(255, 255, 255, 0.9);
-	padding: 0.7rem 0.85rem;
+	padding: 0.75rem 0.85rem;
 	color: var(--ink);
 	font: inherit;
+	/* Prevent iOS zoom-on-focus (requires ≥16px) */
+	font-size: 16px;
+	line-height: 1.35;
 	transition:
 		border-color 0.2s ease,
 		box-shadow 0.2s ease;
+}
+
+.field textarea {
+	min-height: 6.5rem;
+	resize: vertical;
 }
 
 /* Keep native mobile pickers usable with @tailwindcss/forms */
 .field select {
 	appearance: auto;
 	background-image: none;
-	padding-right: 2rem;
+	padding-right: 2.25rem;
 }
 
 .field input:focus,
@@ -157,15 +166,28 @@ a {
 	align-items: center;
 	justify-content: center;
 	gap: 0.45rem;
+	min-height: 2.75rem;
 	border-radius: 999px;
 	padding: 0.7rem 1.15rem;
 	font-weight: 600;
 	border: 1px solid transparent;
 	cursor: pointer;
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
 	transition:
 		transform 0.15s ease,
 		background 0.2s ease,
 		border-color 0.2s ease;
+}
+
+.btn-block {
+	width: 100%;
+}
+
+@media (min-width: 640px) {
+	.btn-block-sm {
+		width: auto;
+	}
 }
 
 .btn:hover {
@@ -212,19 +234,51 @@ a {
 	inset: 0;
 	z-index: 50;
 	display: grid;
-	place-items: center;
-	padding: 1rem;
+	place-items: end center;
+	padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+		max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
 	background: rgba(24, 33, 29, 0.45);
 	backdrop-filter: blur(4px);
+	overflow-y: auto;
+}
+
+@media (min-width: 640px) {
+	.modal-backdrop {
+		place-items: center;
+	}
 }
 
 .modal-panel {
 	width: min(100%, 26rem);
+	max-height: min(90vh, 40rem);
+	overflow-y: auto;
 	border-radius: var(--radius);
 	border: 1px solid var(--line);
 	background: rgba(255, 255, 255, 0.96);
 	box-shadow: var(--shadow);
-	padding: 1.35rem 1.4rem 1.25rem;
+	padding: 1.35rem 1.25rem 1.25rem;
+}
+
+.modal-actions {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 0.5rem;
+}
+
+.modal-actions .btn {
+	width: 100%;
+}
+
+@media (min-width: 640px) {
+	.modal-actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+	}
+
+	.modal-actions .btn {
+		width: auto;
+	}
 }
 
 .badge {
@@ -269,4 +323,35 @@ a {
 	border-radius: 12px;
 	padding: 0.65rem 0.9rem;
 	font-size: 0.9rem;
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.action-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.action-row > .btn,
+.action-row > a.btn {
+	flex: 1 1 calc(50% - 0.25rem);
+	min-width: 8.5rem;
+}
+
+@media (min-width: 640px) {
+	.action-row > .btn,
+	.action-row > a.btn {
+		flex: 0 0 auto;
+	}
 }

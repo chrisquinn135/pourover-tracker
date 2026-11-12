@@ -39,7 +39,7 @@
 		>
 			<h2 id="confirm-title" class="display text-2xl font-semibold">{title}</h2>
 			<p class="mt-2 text-[var(--muted)]">{body}</p>
-			<div class="mt-6 flex flex-wrap justify-end gap-2">
+			<div class="modal-actions mt-6">
 				<button class="btn btn-ghost" type="button" disabled={busy} onclick={oncancel}>
 					Cancel
 				</button>

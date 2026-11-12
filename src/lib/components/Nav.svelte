@@ -11,7 +11,10 @@
 </script>
 
 <header class="mb-8 w-full min-w-0 animate-fade">
-	<a href="/" class="display mb-5 block text-3xl font-bold text-[var(--ink)] md:text-4xl">
+	<a
+		href="/"
+		class="display mb-5 block break-words text-[1.75rem] leading-tight font-bold text-[var(--ink)] sm:text-3xl md:text-4xl"
+	>
 		Pourover tracker
 	</a>
 
@@ -24,7 +27,7 @@
 			<a
 				href={link.href}
 				data-sveltekit-preload-data="hover"
-				class="btn w-full justify-center px-3 py-2 text-center text-sm {active
+				class="btn w-full justify-center px-2 py-2 text-center text-sm {active
 					? 'btn-primary'
 					: 'btn-ghost'}"
 				aria-current={active ? 'page' : undefined}

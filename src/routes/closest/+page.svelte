@@ -173,7 +173,7 @@
 			/>
 		</div>
 		<div class="md:col-span-2">
-			<button class="btn btn-primary" type="submit" disabled={searching}>
+			<button class="btn btn-primary btn-block btn-block-sm" type="submit" disabled={searching}>
 				{searching ? 'Scoring…' : 'Rank similar bags'}
 			</button>
 		</div>

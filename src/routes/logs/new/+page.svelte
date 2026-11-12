@@ -169,7 +169,7 @@
 				<p class="text-sm text-red-700" role="alert">{error}</p>
 			{/if}
 
-			<button class="btn btn-primary" type="submit" disabled={saving}>
+			<button class="btn btn-primary btn-block btn-block-sm" type="submit" disabled={saving}>
 				{saving ? 'Saving…' : 'Save log'}
 			</button>
 		</form>

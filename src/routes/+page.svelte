@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, replaceState } from '$app/navigation';
+	import { page } from '$app/state';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
 	import NotesEditor from '#lib/components/NotesEditor.svelte';
@@ -10,7 +11,28 @@
 	let savingId = $state<string | null>(null);
 	let pendingDelete = $state<{ id: string; beanName: string } | null>(null);
 	let deleting = $state(false);
-	let beanFilter = $state('');
+	let beanFilter = $state(page.url.searchParams.get('beanId') ?? '');
+	let syncedUrlBean = $state(page.url.searchParams.get('beanId') ?? '');
+
+	$effect(() => {
+		const fromUrl = page.url.searchParams.get('beanId') ?? '';
+		if (fromUrl === syncedUrlBean) return;
+		syncedUrlBean = fromUrl;
+		if (!fromUrl || data.beans.some((bean) => bean.id === fromUrl)) {
+			beanFilter = fromUrl;
+		}
+	});
+
+	async function onBagFilterChange(event: Event) {
+		const next = (event.currentTarget as HTMLSelectElement).value;
+		beanFilter = next;
+		const params = new URLSearchParams(page.url.search);
+		if (next) params.set('beanId', next);
+		else params.delete('beanId');
+		const search = params.toString();
+		syncedUrlBean = next;
+		await replaceState(search ? `/?${search}` : '/', {});
+	}
 
 	let beanMap = $derived(Object.fromEntries(data.beans.map((b) => [b.id, b])));
 	let feedLogs = $derived(
@@ -64,12 +86,16 @@
 </script>
 
 <section class="animate-rise">
-	<div class="mb-5 flex flex-wrap items-end justify-between gap-4">
-		<div>
+	<div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+		<div class="min-w-0">
 			<h1 class="display text-3xl font-bold">Feed</h1>
 			<p class="mt-1 text-[var(--muted)]">Every pour, newest first.</p>
 		</div>
-		<a class="btn btn-primary" href="/logs/new" data-sveltekit-preload-data="hover">Add log</a>
+		<a
+			class="btn btn-primary btn-block btn-block-sm"
+			href="/logs/new"
+			data-sveltekit-preload-data="hover">Add log</a
+		>
 	</div>
 
 	<SampleBanner show={data.usingMockData} />
@@ -77,7 +103,7 @@
 	<div class="panel mb-5 p-4">
 		<div class="field max-w-sm">
 			<label for="beanFilter">Bag</label>
-			<select id="beanFilter" bind:value={beanFilter}>
+			<select id="beanFilter" value={beanFilter} onchange={onBagFilterChange}>
 				<option value="">All bags</option>
 				{#each data.beans as bean}
 					<option value={bean.id}>{bean.bagName}</option>
