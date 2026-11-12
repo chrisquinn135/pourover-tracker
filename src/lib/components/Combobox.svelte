@@ -41,15 +41,24 @@
 		return unique.filter((opt) => opt.toLowerCase().includes(q)).slice(0, 40);
 	});
 
+	/** Move the menu to <body> so position:fixed is viewport-relative (panels use backdrop-filter). */
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+		return {
+			destroy() {
+				node.remove();
+			}
+		};
+	}
+
 	function placeListBelow() {
 		if (!inputEl) return;
 		const rect = inputEl.getBoundingClientRect();
 		const gap = 6;
-		const viewportH =
-			window.visualViewport?.height ?? window.innerHeight;
-		const viewportTop = window.visualViewport?.offsetTop ?? 0;
-		const spaceBelow = viewportTop + viewportH - rect.bottom - gap - 8;
-		const maxH = Math.max(96, Math.min(224, spaceBelow));
+		const viewportH = window.visualViewport?.height ?? window.innerHeight;
+		const viewportOffsetTop = window.visualViewport?.offsetTop ?? 0;
+		const spaceBelow = viewportOffsetTop + viewportH - rect.bottom - gap - 8;
+		const maxH = Math.max(96, Math.min(224, Math.max(spaceBelow, 96)));
 
 		listStyle = [
 			'position:fixed',
@@ -208,6 +217,7 @@
 		role="listbox"
 		aria-label="Suggestions"
 		style={listStyle}
+		use:portal
 	>
 		{#each filtered as option, index (option)}
 			<li
@@ -225,7 +235,9 @@
 		{/each}
 	</ul>
 {:else if open && filtered.length === 0}
-	<div class="combobox-empty" role="status" style={listStyle}>No Matching Suggestions</div>
+	<div class="combobox-empty" role="status" style={listStyle} use:portal>
+		No Matching Suggestions
+	</div>
 {/if}
 
 <style>
@@ -264,8 +276,8 @@
 		-webkit-tap-highlight-color: transparent;
 	}
 
-	.combobox-list,
-	.combobox-empty {
+	:global(.combobox-list),
+	:global(.combobox-empty) {
 		margin: 0;
 		border-radius: 12px;
 		border: 1px solid var(--line);
@@ -273,20 +285,20 @@
 		box-shadow: var(--shadow);
 	}
 
-	.combobox-list {
+	:global(.combobox-list) {
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 		padding: 0.35rem;
 		list-style: none;
 	}
 
-	.combobox-empty {
+	:global(.combobox-empty) {
 		padding: 0.75rem 0.85rem;
 		color: var(--muted);
 		font-size: 0.9rem;
 	}
 
-	.combobox-list li {
+	:global(.combobox-list li) {
 		padding: 0.75rem 0.8rem;
 		border-radius: 8px;
 		cursor: pointer;
@@ -297,8 +309,8 @@
 		user-select: none;
 	}
 
-	.combobox-list li.active,
-	.combobox-list li:hover {
+	:global(.combobox-list li.active),
+	:global(.combobox-list li:hover) {
 		background: rgba(31, 107, 86, 0.1);
 		color: var(--accent-deep);
 	}
