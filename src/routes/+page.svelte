@@ -5,33 +5,60 @@
 	import EmptyState from '#lib/components/EmptyState.svelte';
 	import NotesEditor from '#lib/components/NotesEditor.svelte';
 	import ConfirmModal from '#lib/components/ConfirmModal.svelte';
+	import LogForm from '#lib/components/LogForm.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	let savingId = $state<string | null>(null);
 	let pendingDelete = $state<{ id: string; beanName: string } | null>(null);
 	let deleting = $state(false);
+	let showAddLog = $state(page.url.searchParams.get('add') === '1');
 	let beanFilter = $state(page.url.searchParams.get('beanId') ?? '');
 	let syncedUrlBean = $state(page.url.searchParams.get('beanId') ?? '');
+	let syncedAdd = $state(page.url.searchParams.get('add') === '1');
 
 	$effect(() => {
 		const fromUrl = page.url.searchParams.get('beanId') ?? '';
-		if (fromUrl === syncedUrlBean) return;
-		syncedUrlBean = fromUrl;
-		if (!fromUrl || data.beans.some((bean) => bean.id === fromUrl)) {
-			beanFilter = fromUrl;
+		if (fromUrl !== syncedUrlBean) {
+			syncedUrlBean = fromUrl;
+			if (!fromUrl || data.beans.some((bean) => bean.id === fromUrl)) {
+				beanFilter = fromUrl;
+			}
+		}
+		const add = page.url.searchParams.get('add') === '1';
+		if (add !== syncedAdd) {
+			syncedAdd = add;
+			showAddLog = add;
 		}
 	});
+
+	async function syncFeedUrl(nextFilter: string, nextAdd: boolean) {
+		const params = new URLSearchParams(page.url.search);
+		if (nextFilter) params.set('beanId', nextFilter);
+		else params.delete('beanId');
+		if (nextAdd) params.set('add', '1');
+		else params.delete('add');
+		const search = params.toString();
+		syncedUrlBean = nextFilter;
+		syncedAdd = nextAdd;
+		await replaceState(search ? `/?${search}` : '/', {});
+	}
 
 	async function onBagFilterChange(event: Event) {
 		const next = (event.currentTarget as HTMLSelectElement).value;
 		beanFilter = next;
-		const params = new URLSearchParams(page.url.search);
-		if (next) params.set('beanId', next);
-		else params.delete('beanId');
-		const search = params.toString();
-		syncedUrlBean = next;
-		await replaceState(search ? `/?${search}` : '/', {});
+		await syncFeedUrl(next, showAddLog);
+	}
+
+	async function openAddLog() {
+		showAddLog = true;
+		await syncFeedUrl(beanFilter, true);
+		queueMicrotask(() => document.getElementById('add-log')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+	}
+
+	async function closeAddLog() {
+		showAddLog = false;
+		await syncFeedUrl(beanFilter, false);
 	}
 
 	let beanMap = $derived(Object.fromEntries(data.beans.map((b) => [b.id, b])));
@@ -83,6 +110,13 @@
 			deleting = false;
 		}
 	}
+
+	async function onLogSaved(beanId: string) {
+		showAddLog = false;
+		beanFilter = beanId;
+		await syncFeedUrl(beanId, false);
+		await invalidateAll();
+	}
 </script>
 
 <section class="animate-rise">
@@ -91,14 +125,30 @@
 			<h1 class="display text-3xl font-bold">Feed</h1>
 			<p class="mt-1 text-[var(--muted)]">Every pour, newest first.</p>
 		</div>
-		<a
-			class="btn btn-primary btn-block btn-block-sm"
-			href="/logs/new"
-			data-sveltekit-preload-data="hover">Add log</a
-		>
+		{#if !showAddLog}
+			<button
+				class="btn btn-primary btn-block btn-block-sm"
+				type="button"
+				onclick={openAddLog}
+			>
+				Add log
+			</button>
+		{/if}
 	</div>
 
 	<SampleBanner show={data.usingMockData} />
+
+	{#if showAddLog}
+		<div id="add-log" class="mb-5">
+			<LogForm
+				beans={data.beans}
+				logs={data.logs}
+				preferredBeanId={beanFilter}
+				oncancel={closeAddLog}
+				onsaved={onLogSaved}
+			/>
+		</div>
+	{/if}
 
 	<div class="panel mb-5 p-4">
 		<div class="field max-w-sm">
@@ -116,16 +166,16 @@
 		<EmptyState
 			title="No brews yet"
 			body="Log your first pourover to start building your feed."
-			href="/logs/new"
-			cta="Add a log"
+			cta={showAddLog ? undefined : 'Add a log'}
+			onclick={showAddLog ? undefined : openAddLog}
 		/>
 	{:else}
 		<div class="stagger space-y-3">
 			{#each feedLogs as log}
 				<article class="panel p-5">
 					<div class="flex flex-wrap items-start justify-between gap-3">
-						<div>
-							<h2 class="display text-xl font-semibold">{log.beanName}</h2>
+						<div class="min-w-0">
+							<h2 class="display text-xl font-semibold break-words">{log.beanName}</h2>
 							<p class="mt-1 text-sm text-[var(--muted)]">{formatWhen(log.brewedAt)} PT</p>
 						</div>
 						{#if log.rating !== null}
@@ -135,23 +185,23 @@
 					<dl class="mt-4 grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
 						<div>
 							<dt class="text-[var(--muted)]">Temp</dt>
-							<dd class="font-medium">{log.waterTemp || '—'}°F</dd>
+							<dd class="font-medium break-words">{log.waterTemp || '—'}°F</dd>
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Grind</dt>
-							<dd class="font-medium">{log.grindSize || '—'}</dd>
+							<dd class="font-medium break-words">{log.grindSize || '—'}</dd>
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Grinder</dt>
-							<dd class="font-medium">{log.grinder || '—'}</dd>
+							<dd class="font-medium break-words">{log.grinder || '—'}</dd>
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Dripper</dt>
-							<dd class="font-medium">{log.dripper || '—'}</dd>
+							<dd class="font-medium break-words">{log.dripper || '—'}</dd>
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Time</dt>
-							<dd class="font-medium">{log.totalTime || '—'}</dd>
+							<dd class="font-medium break-words">{log.totalTime || '—'}</dd>
 						</div>
 					</dl>
 					<NotesEditor

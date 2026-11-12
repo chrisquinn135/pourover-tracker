@@ -4,11 +4,9 @@ Personal pourover brew tracker built with **SvelteKit**. Bean bags and brew logs
 
 ## Features
 
-- **Add a log** — bag, water temp, grind size, grinder, dripper, total time, rating /10, notes
-- **Add a bean** — bag name and roaster required; country, region, farm, roast, variety, altitude, process, size (small/medium/large), notes, and status optional. Country, roaster, farm, process, variety, and altitude are comboboxes fed by prior bags.
-- **Feed** (home) — all pours or filtered to one bag
-- **Bags list** — in-progress and finished lists (finished sorted by ranking)
-- **Find closest bean** — weighted similarity for a starting recipe
+- **Feed** (home) — pours newest first, filter by bag, **Add log** opens the form on the same page
+- **Bags** — in-progress and finished lists (finished sorted by ranking), **Add bean** opens the form on the same page
+- **Closest** — weighted similarity for a starting recipe
 
 ### Closest-bean scoring
 
@@ -44,7 +42,7 @@ On first write, the app creates **Beans** and **Logs** tabs with headers if they
 
 ### Spreadsheet import
 
-The coffee history from `coffee-spreadsheet.xlsx` is bundled as seed data (24 bags, 6 recipe logs). When Google Sheets is connected, the first app load imports any missing seed bags/logs into your Sheet (matched by bag name + roaster). Local sample mode uses the same seed.
+The coffee history from `coffee-spreadsheet.xlsx` is bundled as local sample data. To load history into Google Sheets, use the Apps Script / CSV importer under `scripts/` and `static/import/`.
 
 ## Scripts
 

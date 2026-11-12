@@ -2,7 +2,6 @@ import { google, type sheets_v4 } from 'googleapis';
 import { env } from './env';
 import type { Bean, BeanInput, BrewLog, BrewLogInput } from '../types';
 import { mockDb } from './mock-store';
-import { beanImportKey, seedBeans, seedLogs } from './seed';
 
 const BEANS_SHEET = 'Beans';
 const LOGS_SHEET = 'Logs';
@@ -46,7 +45,6 @@ const g = globalThis as typeof globalThis & {
 	__pouroverSheets?: {
 		client?: SheetsClient;
 		ready?: Promise<void>;
-		seedImport?: Promise<ImportResult>;
 		beansCache?: { at: number; data: Bean[] };
 		logsCache?: { at: number; data: BrewLog[] };
 	};
@@ -229,62 +227,6 @@ async function readLogsRaw(sheets: SheetsClient): Promise<BrewLog[]> {
 	});
 	const rows = res.data.values ?? [];
 	return rows.map((r) => rowToLog(r.map(String))).filter((l): l is BrewLog => Boolean(l));
-}
-
-type ImportResult = { beansAdded: number; logsAdded: number };
-
-async function importSpreadsheetSeed(): Promise<ImportResult> {
-	const sheets = await ensureReady();
-	const existingBeans = await readBeansRaw(sheets);
-	const existingKeys = new Set(existingBeans.map(beanImportKey));
-	const beansToAdd = seedBeans.filter((bean) => !existingKeys.has(beanImportKey(bean)));
-
-	if (beansToAdd.length > 0) {
-		await sheets.spreadsheets.values.append({
-			spreadsheetId: env.GOOGLE_SHEET_ID!,
-			range: `${BEANS_SHEET}!A:P`,
-			valueInputOption: 'RAW',
-			insertDataOption: 'INSERT_ROWS',
-			requestBody: { values: beansToAdd.map(beanToRow) }
-		});
-	}
-
-	const existingLogs = await readLogsRaw(sheets);
-	const existingLogIds = new Set(existingLogs.map((l) => l.id));
-	const knownBeanIds = new Set([
-		...existingBeans.map((b) => b.id),
-		...beansToAdd.map((b) => b.id)
-	]);
-	const logsToAdd = seedLogs.filter(
-		(log) => !existingLogIds.has(log.id) && knownBeanIds.has(log.beanId)
-	);
-
-	if (logsToAdd.length > 0) {
-		await sheets.spreadsheets.values.append({
-			spreadsheetId: env.GOOGLE_SHEET_ID!,
-			range: `${LOGS_SHEET}!A:J`,
-			valueInputOption: 'RAW',
-			insertDataOption: 'INSERT_ROWS',
-			requestBody: { values: logsToAdd.map(logToRow) }
-		});
-	}
-
-	invalidateCache();
-	return { beansAdded: beansToAdd.length, logsAdded: logsToAdd.length };
-}
-
-/** Only for the Sync seed button — not on every page load. */
-export async function ensureSpreadsheetSeeded(force = false): Promise<ImportResult | null> {
-	if (usingMockData()) return null;
-	const s = state();
-	if (force) s.seedImport = undefined;
-	if (!s.seedImport) {
-		s.seedImport = importSpreadsheetSeed().catch((err) => {
-			s.seedImport = undefined;
-			throw err;
-		});
-	}
-	return s.seedImport;
 }
 
 export const db = {
