@@ -30,6 +30,7 @@
 	let activeIndex = $state(-1);
 	let rootEl: HTMLDivElement | undefined = $state();
 	let inputEl: HTMLInputElement | undefined = $state();
+	let listStyle = $state('');
 	let listId = $derived(`${id}-listbox`);
 	let ignoreOutsideUntil = 0;
 
@@ -40,15 +41,38 @@
 		return unique.filter((opt) => opt.toLowerCase().includes(q)).slice(0, 40);
 	});
 
+	function placeListBelow() {
+		if (!inputEl) return;
+		const rect = inputEl.getBoundingClientRect();
+		const gap = 6;
+		const viewportH =
+			window.visualViewport?.height ?? window.innerHeight;
+		const viewportTop = window.visualViewport?.offsetTop ?? 0;
+		const spaceBelow = viewportTop + viewportH - rect.bottom - gap - 8;
+		const maxH = Math.max(96, Math.min(224, spaceBelow));
+
+		listStyle = [
+			'position:fixed',
+			`top:${Math.round(rect.bottom + gap)}px`,
+			`left:${Math.round(rect.left)}px`,
+			`width:${Math.round(rect.width)}px`,
+			`max-height:${Math.round(maxH)}px`,
+			'z-index:80'
+		].join(';');
+	}
+
 	function openList() {
 		ignoreOutsideUntil = Date.now() + 350;
 		open = true;
 		activeIndex = filtered.length ? 0 : -1;
+		queueMicrotask(placeListBelow);
+		requestAnimationFrame(placeListBelow);
 	}
 
 	function closeList() {
 		open = false;
 		activeIndex = -1;
+		listStyle = '';
 	}
 
 	function toggleList() {
@@ -74,7 +98,6 @@
 	}
 
 	function onPointerDownInput() {
-		// Mobile taps often need an explicit open before focus settles.
 		openList();
 	}
 
@@ -113,10 +136,29 @@
 		const target = event.target;
 		if (!(target instanceof Node)) return;
 		if (rootEl.contains(target)) return;
+		const list = document.getElementById(listId);
+		if (list?.contains(target)) return;
 		closeList();
 	}
+
+	function onViewportChange() {
+		if (open) placeListBelow();
+	}
+
+	$effect(() => {
+		if (!open) return;
+		placeListBelow();
+		const vv = window.visualViewport;
+		vv?.addEventListener('resize', onViewportChange);
+		vv?.addEventListener('scroll', onViewportChange);
+		return () => {
+			vv?.removeEventListener('resize', onViewportChange);
+			vv?.removeEventListener('scroll', onViewportChange);
+		};
+	});
 </script>
 
+<svelte:window onscroll={onViewportChange} onresize={onViewportChange} />
 <svelte:document onpointerdown={onDocPointerDown} />
 
 <div class="combobox" bind:this={rootEl}>
@@ -157,38 +199,39 @@
 			▾
 		</button>
 	</div>
-
-	{#if open && filtered.length > 0}
-		<ul id={listId} class="combobox-list" role="listbox" aria-label="Suggestions">
-			{#each filtered as option, index (option)}
-				<li
-					id={`${listId}-${index}`}
-					role="option"
-					aria-selected={index === activeIndex}
-					class:active={index === activeIndex}
-					onpointerdown={(event) => {
-						event.preventDefault();
-						choose(option);
-					}}
-				>
-					{toTitleCase(option)}
-				</li>
-			{/each}
-		</ul>
-	{:else if open && filtered.length === 0}
-		<div class="combobox-empty" role="status">No Matching Suggestions</div>
-	{/if}
 </div>
+
+{#if open && filtered.length > 0}
+	<ul
+		id={listId}
+		class="combobox-list"
+		role="listbox"
+		aria-label="Suggestions"
+		style={listStyle}
+	>
+		{#each filtered as option, index (option)}
+			<li
+				id={`${listId}-${index}`}
+				role="option"
+				aria-selected={index === activeIndex}
+				class:active={index === activeIndex}
+				onpointerdown={(event) => {
+					event.preventDefault();
+					choose(option);
+				}}
+			>
+				{toTitleCase(option)}
+			</li>
+		{/each}
+	</ul>
+{:else if open && filtered.length === 0}
+	<div class="combobox-empty" role="status" style={listStyle}>No Matching Suggestions</div>
+{/if}
 
 <style>
 	.combobox {
 		position: relative;
 		width: 100%;
-		z-index: 1;
-	}
-
-	.combobox:focus-within {
-		z-index: 30;
 	}
 
 	.combobox-control {
@@ -223,11 +266,6 @@
 
 	.combobox-list,
 	.combobox-empty {
-		position: absolute;
-		z-index: 40;
-		top: calc(100% + 0.3rem);
-		left: 0;
-		right: 0;
 		margin: 0;
 		border-radius: 12px;
 		border: 1px solid var(--line);
@@ -236,7 +274,6 @@
 	}
 
 	.combobox-list {
-		max-height: min(14rem, 45vh);
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 		padding: 0.35rem;
