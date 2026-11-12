@@ -39,6 +39,10 @@ npm run preview -- --port 3457 --host 127.0.0.1
 
 On first write, the app creates **Beans** and **Logs** tabs with headers if they are missing.
 
+## Auth and write limits
+
+The published private app requires a signed-in Cursor viewer for page data and `/api/*`. Locally, a simulated viewer is used. Write endpoints cap JSON bodies at 32KB and allow about 60 writes per viewer per minute.
+
 ### Spreadsheet import
 
 Sample bags/logs ship in `src/lib/server/seed-from-spreadsheet.json` for local mode. To load history into Google Sheets, use the Apps Script / CSV importer under `scripts/` and `static/import/`.

@@ -1,17 +1,16 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { requireViewer } from '#lib/server/auth';
+import { readJsonBody } from '#lib/server/limits';
 import { db } from '#lib/server/sheets';
 import { findClosestBeans } from '#lib/similarity';
 import type { Bean, Region, RoastLevel } from '#lib/types';
 
-export const POST: RequestHandler = async ({ request }) => {
-	const body = (await request.json()) as {
-		query?: Partial<Bean>;
-		excludeId?: string;
-		limit?: number;
-	};
-
-	const query = body.query ?? {};
+export const POST: RequestHandler = async ({ request, locals }) => {
+	await requireViewer(request);
+	void locals.viewer;
+	const body = await readJsonBody(request);
+	const query = (body.query ?? {}) as Partial<Bean>;
 	if (!query.roastLevel) {
 		throw error(400, 'roastLevel is required to find closest beans');
 	}
@@ -28,9 +27,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		roastLevel: (query.roastLevel as RoastLevel | '') || ''
 	};
 
+	const excludeId = typeof body.excludeId === 'string' ? body.excludeId : undefined;
+	const limit = typeof body.limit === 'number' ? Math.min(Math.max(1, body.limit), 25) : 8;
+
 	const matches = findClosestBeans(normalized, beans, logCounts, {
-		excludeId: body.excludeId,
-		limit: body.limit ?? 8
+		excludeId,
+		limit
 	});
 
 	return json({ matches, usingMockData: db.usingMockData() });
