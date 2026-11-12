@@ -25,11 +25,15 @@ npm run build
 npm run preview -- --port 3457 --host 127.0.0.1
 ```
 
+## Deploy on Vercel
+
+The project uses `@sveltejs/adapter-vercel`. Import the Git repo in Vercel, set the three Google Sheets env vars, and deploy. Without those vars the app serves sample data.
+
 ## Google Sheets setup
 
 1. Create a Google Cloud service account and download a JSON key.
 2. Create a blank Google Sheet and share it with the service account email (**Editor**).
-3. Set these environment variables (published app: bind them as secrets in Cursor):
+3. Set these environment variables (e.g. in Vercel project settings):
 
 | Variable | Description |
 |---|---|
@@ -39,9 +43,9 @@ npm run preview -- --port 3457 --host 127.0.0.1
 
 On first write, the app creates **Beans** and **Logs** tabs with headers if they are missing.
 
-## Auth and write limits
+## Write limits
 
-The published private app requires a signed-in Cursor viewer for page data and `/api/*`. Locally, a simulated viewer is used. Write endpoints cap JSON bodies at 32KB and allow about 60 writes per viewer per minute.
+Write endpoints cap JSON bodies at 32KB and allow about 60 writes per client IP per minute.
 
 ### Spreadsheet import
 

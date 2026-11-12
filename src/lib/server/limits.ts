@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 /** Max JSON body size for write endpoints (notes + form fields). */
 export const MAX_WRITE_BODY_BYTES = 32_768;
 
-/** Writes allowed per viewer per rolling window. */
+/** Writes allowed per client IP per rolling window. */
 export const WRITE_RATE_LIMIT = 60;
 export const WRITE_RATE_WINDOW_MS = 60_000;
 
@@ -18,10 +18,9 @@ function buckets() {
 	return g.__pouroverWriteLimits;
 }
 
-function clientKey(request: Request, viewerSub: string): string {
+function clientKey(request: Request): string {
 	const forwarded = request.headers.get('x-forwarded-for');
-	const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'local';
-	return `${viewerSub}:${ip}`;
+	return forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'local';
 }
 
 /** Reject oversized write bodies before parsing JSON. */
@@ -37,9 +36,9 @@ export function assertWriteBodySize(request: Request) {
 	}
 }
 
-/** Simple in-memory write rate limit per viewer (+ IP). */
-export function assertWriteRateLimit(request: Request, viewerSub: string) {
-	const key = clientKey(request, viewerSub);
+/** Simple in-memory write rate limit per client IP. */
+export function assertWriteRateLimit(request: Request) {
+	const key = clientKey(request);
 	const now = Date.now();
 	const map = buckets();
 	const current = map.get(key);

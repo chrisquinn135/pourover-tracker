@@ -1,14 +1,11 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { requireViewer } from '#lib/server/auth';
 import { readJsonBody } from '#lib/server/limits';
 import { db } from '#lib/server/sheets';
 import { findClosestBeans } from '#lib/similarity';
 import type { Bean, Region, RoastLevel } from '#lib/types';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
-	await requireViewer(request);
-	void locals.viewer;
+export const POST: RequestHandler = async ({ request }) => {
 	const body = await readJsonBody(request);
 	const query = (body.query ?? {}) as Partial<Bean>;
 	if (!query.roastLevel) {

@@ -1,6 +1,5 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { requireViewer } from '#lib/server/auth';
 import { readJsonBody } from '#lib/server/limits';
 import { db } from '#lib/server/sheets';
 import { normalizeBeanForStorage } from '#lib/text';
@@ -42,9 +41,7 @@ function parseBeanBody(body: Record<string, unknown>): BeanInput {
 	});
 }
 
-export const POST: RequestHandler = async ({ request, locals }) => {
-	await requireViewer(request);
-	void locals.viewer;
+export const POST: RequestHandler = async ({ request }) => {
 	const body = await readJsonBody(request);
 	const input = parseBeanBody(body);
 	const bean = await db.createBean(input);

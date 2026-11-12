@@ -1,14 +1,11 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { requireViewer } from '#lib/server/auth';
 import { readJsonBody } from '#lib/server/limits';
 import { db } from '#lib/server/sheets';
 import { normalizeBeanPatch } from '#lib/text';
 import type { BeanInput, BeanStatus, Region, RoastLevel } from '#lib/types';
 
-export const PATCH: RequestHandler = async ({ params, request, locals }) => {
-	await requireViewer(request);
-	void locals.viewer;
+export const PATCH: RequestHandler = async ({ params, request }) => {
 	const body = await readJsonBody(request);
 	const patch: Partial<BeanInput> = {};
 
@@ -52,9 +49,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 	return json({ bean });
 };
 
-export const DELETE: RequestHandler = async ({ params, request, locals }) => {
-	await requireViewer(request);
-	void locals.viewer;
+export const DELETE: RequestHandler = async ({ params }) => {
 	const existing = await db.getBean(params.id);
 	if (!existing) throw error(404, 'Bean not found');
 	await db.deleteBean(params.id);
