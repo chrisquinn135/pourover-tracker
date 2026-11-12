@@ -23,9 +23,9 @@
 	let grindSize = $state('');
 	let grinder = $state('');
 	let dripper = $state('');
-	let minutes = $state('');
-	let seconds = $state('');
-	let rating = $state('');
+	let minutes = $state<number | null>(null);
+	let seconds = $state<number | null>(null);
+	let rating = $state<number | null>(null);
 	let notes = $state('');
 	let error = $state('');
 	let saving = $state(false);
@@ -57,9 +57,9 @@
 		saving = true;
 		try {
 			const totalTime = formatTotalTime(minutes, seconds);
-			if (minutes !== '' || seconds !== '') {
-				const m = Number(minutes || 0);
-				const s = Number(seconds || 0);
+			if (minutes !== null || seconds !== null) {
+				const m = minutes ?? 0;
+				const s = seconds ?? 0;
 				if (!Number.isFinite(m) || !Number.isFinite(s) || m < 0 || s < 0 || s >= 60) {
 					throw new Error('Enter a valid time (seconds 0–59)');
 				}
@@ -75,7 +75,7 @@
 					grinder,
 					dripper,
 					totalTime,
-					rating: rating === '' ? null : Number(rating),
+					rating,
 					notes
 				})
 			});

@@ -23,7 +23,7 @@
 	let similarFor = $state<Bean | null>(null);
 	// SvelteKit 3 shallow goto updates page.shallow.url, not page.url.
 	let visibleUrl = $derived(page.shallow?.url ?? page.url);
-	let showAddBean = $state(visibleUrl.searchParams.get('add') === '1');
+	let showAddBean = $state(page.url.searchParams.get('add') === '1');
 
 	$effect(() => {
 		showAddBean = visibleUrl.searchParams.get('add') === '1';
@@ -331,7 +331,7 @@
 <RankModal
 	open={pendingFinish !== null}
 	bagName={pendingFinish?.bagName ?? ''}
-	initial={pendingFinish?.ranking?.toString() ?? '8'}
+	initial={pendingFinish?.ranking ?? 8}
 	busy={finishing}
 	oncancel={() => {
 		if (!finishing) pendingFinish = null;

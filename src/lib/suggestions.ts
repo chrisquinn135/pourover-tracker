@@ -51,10 +51,23 @@ export function logFieldSuggestions(logs: BrewLog[]) {
 	};
 }
 
-export function formatTotalTime(minutes: string, seconds: string): string {
-	const m = minutes.trim() === '' ? 0 : Number(minutes);
-	const s = seconds.trim() === '' ? 0 : Number(seconds);
-	if (!Number.isFinite(m) || !Number.isFinite(s) || m < 0 || s < 0) {
+function parseTimePart(value: string | number | null | undefined): number | null {
+	if (value === null || value === undefined) return 0;
+	if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+	const trimmed = value.trim();
+	if (trimmed === '') return 0;
+	const n = Number(trimmed);
+	return Number.isFinite(n) ? n : null;
+}
+
+/** Accepts string or number — Svelte binds type=number inputs as number|null. */
+export function formatTotalTime(
+	minutes: string | number | null | undefined,
+	seconds: string | number | null | undefined
+): string {
+	const m = parseTimePart(minutes);
+	const s = parseTimePart(seconds);
+	if (m === null || s === null || m < 0 || s < 0) {
 		return '';
 	}
 	const wholeMinutes = Math.floor(m);

@@ -4,20 +4,20 @@
 	let {
 		open = false,
 		bagName = '',
-		initial = '8',
+		initial = 8,
 		busy = false,
 		onconfirm,
 		oncancel
 	}: {
 		open?: boolean;
 		bagName?: string;
-		initial?: string;
+		initial?: number;
 		busy?: boolean;
 		onconfirm: (ranking: number) => void | Promise<void>;
 		oncancel: () => void;
 	} = $props();
 
-	let ranking = $state('8');
+	let ranking = $state<number | null>(8);
 	let error = $state('');
 
 	$effect(() => {
@@ -35,8 +35,8 @@
 	async function submit(event: Event) {
 		event.preventDefault();
 		error = '';
-		const value = Number(ranking);
-		if (!Number.isFinite(value) || value < 0 || value > 10) {
+		const value = ranking;
+		if (value === null || !Number.isFinite(value) || value < 0 || value > 10) {
 			error = 'Enter a Ranking from 0 to 10.';
 			return;
 		}

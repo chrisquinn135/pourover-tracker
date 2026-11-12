@@ -27,7 +27,7 @@
 	let beanSize = $state('');
 	let notes = $state('');
 	let status = $state<'in_progress' | 'finished'>('in_progress');
-	let ranking = $state('');
+	let ranking = $state<number | null>(null);
 	let error = $state('');
 	let saving = $state(false);
 
@@ -52,7 +52,7 @@
 					beanSize,
 					notes,
 					status,
-					ranking: ranking === '' ? null : Number(ranking)
+					ranking
 				})
 			});
 			if (!res.ok) {

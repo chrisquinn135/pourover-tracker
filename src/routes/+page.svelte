@@ -16,8 +16,8 @@
 	let deleting = $state(false);
 	// SvelteKit 3 shallow goto updates page.shallow.url, not page.url.
 	let visibleUrl = $derived(page.shallow?.url ?? page.url);
-	let showAddLog = $state(visibleUrl.searchParams.get('add') === '1');
-	let beanFilter = $state(visibleUrl.searchParams.get('beanId') ?? '');
+	let showAddLog = $state(page.url.searchParams.get('add') === '1');
+	let beanFilter = $state(page.url.searchParams.get('beanId') ?? '');
 
 	$effect(() => {
 		const fromUrl = visibleUrl.searchParams.get('beanId') ?? '';
