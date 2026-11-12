@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll, replaceState } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
@@ -14,36 +14,31 @@
 	let savingId = $state<string | null>(null);
 	let pendingDelete = $state<{ id: string; beanName: string } | null>(null);
 	let deleting = $state(false);
-	let showAddLog = $state(page.url.searchParams.get('add') === '1');
-	let beanFilter = $state(page.url.searchParams.get('beanId') ?? '');
-	let syncedUrlBean = $state(page.url.searchParams.get('beanId') ?? '');
-	let syncedAdd = $state(page.url.searchParams.get('add') === '1');
+	// SvelteKit 3 shallow goto updates page.shallow.url, not page.url.
+	let visibleUrl = $derived(page.shallow?.url ?? page.url);
+	let showAddLog = $state(visibleUrl.searchParams.get('add') === '1');
+	let beanFilter = $state(visibleUrl.searchParams.get('beanId') ?? '');
 
 	$effect(() => {
-		const fromUrl = page.url.searchParams.get('beanId') ?? '';
-		if (fromUrl !== syncedUrlBean) {
-			syncedUrlBean = fromUrl;
-			if (!fromUrl || data.beans.some((bean) => bean.id === fromUrl)) {
-				beanFilter = fromUrl;
-			}
+		const fromUrl = visibleUrl.searchParams.get('beanId') ?? '';
+		if (!fromUrl || data.beans.some((bean) => bean.id === fromUrl)) {
+			beanFilter = fromUrl;
 		}
-		const add = page.url.searchParams.get('add') === '1';
-		if (add !== syncedAdd) {
-			syncedAdd = add;
-			showAddLog = add;
-		}
+		showAddLog = visibleUrl.searchParams.get('add') === '1';
 	});
 
 	async function syncFeedUrl(nextFilter: string, nextAdd: boolean) {
-		const params = new URLSearchParams(page.url.search);
+		const params = new URLSearchParams(visibleUrl.search);
 		if (nextFilter) params.set('beanId', nextFilter);
 		else params.delete('beanId');
 		if (nextAdd) params.set('add', '1');
 		else params.delete('add');
 		const search = params.toString();
-		syncedUrlBean = nextFilter;
-		syncedAdd = nextAdd;
-		await replaceState(search ? `/?${search}` : '/', {});
+		await goto(search ? `/?${search}` : '/', {
+			replace: true,
+			shallow: true,
+			reset: false
+		});
 	}
 
 	async function onBagFilterChange(event: Event) {
@@ -53,13 +48,11 @@
 	}
 
 	async function openAddLog() {
-		showAddLog = true;
 		await syncFeedUrl(beanFilter, true);
 		queueMicrotask(() => document.getElementById('add-log')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 	}
 
 	async function closeAddLog() {
-		showAddLog = false;
 		await syncFeedUrl(beanFilter, false);
 	}
 
@@ -114,7 +107,6 @@
 	}
 
 	async function onLogSaved(beanId: string) {
-		showAddLog = false;
 		beanFilter = beanId;
 		await syncFeedUrl(beanId, false);
 		await invalidateAll();
@@ -125,7 +117,7 @@
 	<PageToolbar
 		actionLabel="Add Log"
 		showAction={!showAddLog}
-		onaction={openAddLog}
+		onAction={openAddLog}
 	/>
 
 	<SampleBanner show={data.usingMockData} />

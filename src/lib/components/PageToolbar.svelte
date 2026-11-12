@@ -4,18 +4,18 @@
 	let {
 		actionLabel,
 		showAction = true,
-		onaction
+		onAction
 	}: {
 		actionLabel?: string;
 		showAction?: boolean;
-		onaction?: () => void;
+		onAction?: () => void;
 	} = $props();
 </script>
 
 <div class="page-toolbar">
 	<SegmentedNav />
-	{#if showAction && actionLabel && onaction}
-		<button class="btn btn-primary shrink-0" type="button" onclick={onaction}>
+	{#if showAction && actionLabel && onAction}
+		<button class="btn btn-primary shrink-0" type="button" onclick={onAction}>
 			{actionLabel}
 		</button>
 	{/if}

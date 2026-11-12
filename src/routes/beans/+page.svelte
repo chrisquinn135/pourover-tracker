@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll, replaceState } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
@@ -21,28 +21,27 @@
 	let finishing = $state(false);
 	let search = $state('');
 	let similarFor = $state<Bean | null>(null);
-	let showAddBean = $state(page.url.searchParams.get('add') === '1');
-	let syncedAdd = $state(page.url.searchParams.get('add') === '1');
+	// SvelteKit 3 shallow goto updates page.shallow.url, not page.url.
+	let visibleUrl = $derived(page.shallow?.url ?? page.url);
+	let showAddBean = $state(visibleUrl.searchParams.get('add') === '1');
 
 	$effect(() => {
-		const add = page.url.searchParams.get('add') === '1';
-		if (add !== syncedAdd) {
-			syncedAdd = add;
-			showAddBean = add;
-		}
+		showAddBean = visibleUrl.searchParams.get('add') === '1';
 	});
 
 	async function syncBagsUrl(nextAdd: boolean) {
-		const params = new URLSearchParams(page.url.search);
+		const params = new URLSearchParams(visibleUrl.search);
 		if (nextAdd) params.set('add', '1');
 		else params.delete('add');
 		const searchQs = params.toString();
-		syncedAdd = nextAdd;
-		await replaceState(searchQs ? `/beans?${searchQs}` : '/beans', {});
+		await goto(searchQs ? `/beans?${searchQs}` : '/beans', {
+			replace: true,
+			shallow: true,
+			reset: false
+		});
 	}
 
 	async function openAddBean() {
-		showAddBean = true;
 		await syncBagsUrl(true);
 		queueMicrotask(() =>
 			document.getElementById('add-bean')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -50,7 +49,6 @@
 	}
 
 	async function closeAddBean() {
-		showAddBean = false;
 		await syncBagsUrl(false);
 	}
 
@@ -127,7 +125,6 @@
 	}
 
 	async function onBeanSaved() {
-		showAddBean = false;
 		await syncBagsUrl(false);
 		await invalidateAll();
 	}
@@ -137,7 +134,7 @@
 	<PageToolbar
 		actionLabel="Add Bean"
 		showAction={!showAddBean}
-		onaction={openAddBean}
+		onAction={openAddBean}
 	/>
 
 	<SampleBanner show={data.usingMockData} />
