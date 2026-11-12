@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { toTitleCase } from '#lib/text';
 
 	let {
 		id,
@@ -30,47 +30,33 @@
 	let activeIndex = $state(-1);
 	let rootEl: HTMLDivElement | undefined = $state();
 	let inputEl: HTMLInputElement | undefined = $state();
-	let listStyle = $state('');
 	let listId = $derived(`${id}-listbox`);
+	let ignoreOutsideUntil = 0;
 
 	let filtered = $derived.by(() => {
 		const q = value.trim().toLowerCase();
-		const unique = [...new Set(options.filter(Boolean))];
+		const unique = [...new Set((options ?? []).filter(Boolean))];
 		if (!q) return unique.slice(0, 40);
 		return unique.filter((opt) => opt.toLowerCase().includes(q)).slice(0, 40);
 	});
 
-	function placeList() {
-		if (!inputEl) return;
-		const rect = inputEl.getBoundingClientRect();
-		const gap = 6;
-		const maxH = Math.min(224, Math.round(window.innerHeight * 0.4));
-		const spaceBelow = window.innerHeight - rect.bottom - gap;
-		const spaceAbove = rect.top - gap;
-		const openUp = spaceBelow < Math.min(maxH, 140) && spaceAbove > spaceBelow;
-		const height = Math.max(80, Math.min(maxH, openUp ? spaceAbove : spaceBelow));
-
-		listStyle = [
-			`position:fixed`,
-			`left:${Math.round(rect.left)}px`,
-			`width:${Math.round(rect.width)}px`,
-			`max-height:${height}px`,
-			openUp
-				? `bottom:${Math.round(window.innerHeight - rect.top + gap)}px`
-				: `top:${Math.round(rect.bottom + gap)}px`,
-			`z-index:60`
-		].join(';');
-	}
-
 	function openList() {
+		ignoreOutsideUntil = Date.now() + 350;
 		open = true;
 		activeIndex = filtered.length ? 0 : -1;
-		queueMicrotask(placeList);
 	}
 
 	function closeList() {
 		open = false;
 		activeIndex = -1;
+	}
+
+	function toggleList() {
+		if (open) closeList();
+		else {
+			openList();
+			inputEl?.focus();
+		}
 	}
 
 	function choose(option: string) {
@@ -84,6 +70,11 @@
 	}
 
 	function onFocus() {
+		openList();
+	}
+
+	function onPointerDownInput() {
+		// Mobile taps often need an explicit open before focus settles.
 		openList();
 	}
 
@@ -118,61 +109,57 @@
 
 	function onDocPointerDown(event: PointerEvent) {
 		if (!open || !rootEl) return;
+		if (Date.now() < ignoreOutsideUntil) return;
 		const target = event.target;
 		if (!(target instanceof Node)) return;
 		if (rootEl.contains(target)) return;
-		const list = document.getElementById(listId);
-		if (list?.contains(target)) return;
 		closeList();
 	}
-
-	function onViewportChange() {
-		if (open) placeList();
-	}
-
-	$effect(() => {
-		if (!open) return;
-		placeList();
-	});
-
-	onDestroy(() => {
-		closeList();
-	});
 </script>
 
-<svelte:window onscroll={onViewportChange} onresize={onViewportChange} />
 <svelte:document onpointerdown={onDocPointerDown} />
 
 <div class="combobox" bind:this={rootEl}>
-	<input
-		bind:this={inputEl}
-		{id}
-		{name}
-		{required}
-		{inputmode}
-		bind:value
-		autocomplete="off"
-		autocapitalize="off"
-		autocorrect="off"
-		spellcheck="false"
-		role="combobox"
-		aria-expanded={open && filtered.length > 0}
-		aria-controls={listId}
-		aria-autocomplete="list"
-		aria-activedescendant={activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
-		onfocus={onFocus}
-		oninput={onInput}
-		onkeydown={onKeydown}
-	/>
+	<div class="combobox-control">
+		<input
+			bind:this={inputEl}
+			{id}
+			{name}
+			{required}
+			{inputmode}
+			bind:value
+			autocomplete="off"
+			autocapitalize="off"
+			autocorrect="off"
+			spellcheck="false"
+			role="combobox"
+			aria-expanded={open && filtered.length > 0}
+			aria-controls={listId}
+			aria-autocomplete="list"
+			aria-activedescendant={activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
+			onfocus={onFocus}
+			oninput={onInput}
+			onkeydown={onKeydown}
+			onpointerdown={onPointerDownInput}
+		/>
+		<button
+			class="combobox-toggle"
+			type="button"
+			tabindex="-1"
+			aria-label="Show Suggestions"
+			aria-controls={listId}
+			aria-expanded={open && filtered.length > 0}
+			onclick={(event) => {
+				event.preventDefault();
+				toggleList();
+			}}
+		>
+			▾
+		</button>
+	</div>
 
 	{#if open && filtered.length > 0}
-		<ul
-			id={listId}
-			class="combobox-list"
-			role="listbox"
-			aria-label="Suggestions"
-			style={listStyle}
-		>
+		<ul id={listId} class="combobox-list" role="listbox" aria-label="Suggestions">
 			{#each filtered as option, index (option)}
 				<li
 					id={`${listId}-${index}`}
@@ -184,10 +171,12 @@
 						choose(option);
 					}}
 				>
-					{option}
+					{toTitleCase(option)}
 				</li>
 			{/each}
 		</ul>
+	{:else if open && filtered.length === 0}
+		<div class="combobox-empty" role="status">No Matching Suggestions</div>
 	{/if}
 </div>
 
@@ -195,22 +184,69 @@
 	.combobox {
 		position: relative;
 		width: 100%;
+		z-index: 1;
 	}
 
-	.combobox :global(input) {
+	.combobox:focus-within {
+		z-index: 30;
+	}
+
+	.combobox-control {
+		position: relative;
+		display: flex;
+		align-items: stretch;
 		width: 100%;
 	}
 
-	.combobox-list {
+	.combobox-control :global(input) {
+		width: 100%;
+		padding-right: 2.6rem;
+	}
+
+	.combobox-toggle {
+		position: absolute;
+		top: 50%;
+		right: 0.35rem;
+		transform: translateY(-50%);
+		width: 2.1rem;
+		height: 2.1rem;
+		border: 0;
+		border-radius: 999px;
+		background: transparent;
+		color: var(--muted);
+		font-size: 0.85rem;
+		line-height: 1;
+		cursor: pointer;
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.combobox-list,
+	.combobox-empty {
+		position: absolute;
+		z-index: 40;
+		top: calc(100% + 0.3rem);
+		left: 0;
+		right: 0;
 		margin: 0;
-		padding: 0.35rem;
-		list-style: none;
-		overflow-y: auto;
-		-webkit-overflow-scrolling: touch;
 		border-radius: 12px;
 		border: 1px solid var(--line);
 		background: rgba(255, 255, 255, 0.98);
 		box-shadow: var(--shadow);
+	}
+
+	.combobox-list {
+		max-height: min(14rem, 45vh);
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		padding: 0.35rem;
+		list-style: none;
+	}
+
+	.combobox-empty {
+		padding: 0.75rem 0.85rem;
+		color: var(--muted);
+		font-size: 0.9rem;
 	}
 
 	.combobox-list li {

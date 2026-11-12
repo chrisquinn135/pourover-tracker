@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { displayText } from '#lib/text';
+
 	let {
 		open = false,
 		bagName = '',
@@ -35,7 +37,7 @@
 		error = '';
 		const value = Number(ranking);
 		if (!Number.isFinite(value) || value < 0 || value > 10) {
-			error = 'Enter a ranking from 0 to 10.';
+			error = 'Enter a Ranking from 0 to 10.';
 			return;
 		}
 		await onconfirm(value);
@@ -56,9 +58,9 @@
 			tabindex="-1"
 			onclick={(event) => event.stopPropagation()}
 		>
-			<h2 id="rank-title" class="display text-2xl font-semibold">Mark finished</h2>
+			<h2 id="rank-title" class="display text-2xl font-semibold">Mark Finished</h2>
 			<p class="mt-2 text-[var(--muted)]">
-				Rank “{bagName}” out of 10, then finish the bag.
+				Rank “{displayText(bagName, bagName)}” Out of 10, Then Finish the Bag.
 			</p>
 			<form class="mt-4" onsubmit={submit}>
 				<div class="field">
@@ -82,7 +84,7 @@
 						Cancel
 					</button>
 					<button class="btn btn-primary" type="submit" disabled={busy}>
-						{busy ? 'Saving…' : 'Save ranking'}
+						{busy ? 'Saving…' : 'Save Ranking'}
 					</button>
 				</div>
 			</form>

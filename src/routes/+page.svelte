@@ -6,6 +6,7 @@
 	import NotesEditor from '#lib/components/NotesEditor.svelte';
 	import ConfirmModal from '#lib/components/ConfirmModal.svelte';
 	import LogForm from '#lib/components/LogForm.svelte';
+	import { displayText } from '#lib/text';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -123,7 +124,7 @@
 	<div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
 		<div class="min-w-0">
 			<h1 class="display text-3xl font-bold">Feed</h1>
-			<p class="mt-1 text-[var(--muted)]">Every pour, newest first.</p>
+			<p class="mt-1 text-[var(--muted)]">Every Pour, Newest First.</p>
 		</div>
 		{#if !showAddLog}
 			<button
@@ -131,7 +132,7 @@
 				type="button"
 				onclick={openAddLog}
 			>
-				Add log
+				Add Log
 			</button>
 		{/if}
 	</div>
@@ -154,9 +155,9 @@
 		<div class="field max-w-sm">
 			<label for="beanFilter">Bag</label>
 			<select id="beanFilter" value={beanFilter} onchange={onBagFilterChange}>
-				<option value="">All bags</option>
+				<option value="">All Bags</option>
 				{#each data.beans as bean}
-					<option value={bean.id}>{bean.bagName}</option>
+					<option value={bean.id}>{displayText(bean.bagName, bean.bagName)}</option>
 				{/each}
 			</select>
 		</div>
@@ -164,9 +165,9 @@
 
 	{#if feedLogs.length === 0}
 		<EmptyState
-			title="No brews yet"
-			body="Log your first pourover to start building your feed."
-			cta={showAddLog ? undefined : 'Add a log'}
+			title="No Brews Yet"
+			body="Log Your First Pourover to Start Building Your Feed."
+			cta={showAddLog ? undefined : 'Add a Log'}
 			onclick={showAddLog ? undefined : openAddLog}
 		/>
 	{:else}
@@ -175,7 +176,9 @@
 				<article class="panel p-5">
 					<div class="flex flex-wrap items-start justify-between gap-3">
 						<div class="min-w-0">
-							<h2 class="display text-xl font-semibold break-words">{log.beanName}</h2>
+							<h2 class="display text-xl font-semibold break-words">
+								{displayText(log.beanName, log.beanName)}
+							</h2>
 							<p class="mt-1 text-sm text-[var(--muted)]">{formatWhen(log.brewedAt)} PT</p>
 						</div>
 						{#if log.rating !== null}
@@ -189,15 +192,15 @@
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Grind</dt>
-							<dd class="font-medium break-words">{log.grindSize || '—'}</dd>
+							<dd class="font-medium break-words">{displayText(log.grindSize)}</dd>
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Grinder</dt>
-							<dd class="font-medium break-words">{log.grinder || '—'}</dd>
+							<dd class="font-medium break-words">{displayText(log.grinder)}</dd>
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Dripper</dt>
-							<dd class="font-medium break-words">{log.dripper || '—'}</dd>
+							<dd class="font-medium break-words">{displayText(log.dripper)}</dd>
 						</div>
 						<div>
 							<dt class="text-[var(--muted)]">Time</dt>
@@ -215,7 +218,7 @@
 							type="button"
 							onclick={() => (pendingDelete = { id: log.id, beanName: log.beanName })}
 						>
-							Delete log
+							Delete Log
 						</button>
 					</div>
 				</article>
@@ -226,9 +229,9 @@
 
 <ConfirmModal
 	open={pendingDelete !== null}
-	title="Delete this log?"
+	title="Delete This Log?"
 	body={pendingDelete
-		? `Remove this brew log for “${pendingDelete.beanName}”? This can’t be undone.`
+		? `Remove This Brew Log for “${displayText(pendingDelete.beanName, pendingDelete.beanName)}”? This Can’t Be Undone.`
 		: ''}
 	busy={deleting}
 	oncancel={() => {

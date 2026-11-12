@@ -106,6 +106,7 @@ a {
 	border-radius: var(--radius);
 	box-shadow: var(--shadow);
 	backdrop-filter: blur(10px);
+	overflow: visible;
 }
 
 .field {
@@ -115,10 +116,9 @@ a {
 }
 
 .field label {
-	font-size: 0.78rem;
+	font-size: 0.85rem;
 	font-weight: 600;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
+	letter-spacing: 0.01em;
 	color: var(--muted);
 }
 

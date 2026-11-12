@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Combobox from '#lib/components/Combobox.svelte';
 	import { formatTotalTime, logFieldSuggestions } from '#lib/suggestions';
+	import { displayText } from '#lib/text';
 	import type { Bean, BrewLog } from '#lib/types';
 
 	let {
@@ -94,7 +95,7 @@
 {#if inProgressBeans.length === 0}
 	<div class="panel p-5">
 		<p class="text-[var(--muted)]">
-			No in-progress bags. Add a bean on Bags before logging a brew.
+			No In-Progress Bags. Add a Bean on Bags Before Logging a Brew.
 		</p>
 		{#if oncancel}
 			<button class="btn btn-ghost mt-4" type="button" onclick={oncancel}>Close</button>
@@ -104,8 +105,8 @@
 	<form class="panel space-y-4 p-5 md:p-6" onsubmit={submit}>
 		<div class="flex flex-wrap items-start justify-between gap-3">
 			<div>
-				<h2 class="display text-xl font-semibold">Add a log</h2>
-				<p class="mt-1 text-sm text-[var(--muted)]">Record the variables from this pour.</p>
+				<h2 class="display text-xl font-semibold">Add a Log</h2>
+				<p class="mt-1 text-sm text-[var(--muted)]">Record the Variables from This Pour.</p>
 			</div>
 			{#if oncancel}
 				<button class="btn btn-ghost" type="button" onclick={oncancel}>Cancel</button>
@@ -113,21 +114,21 @@
 		</div>
 
 		<div class="field">
-			<label for="beanId">Bag of beans</label>
+			<label for="beanId">Bag of Beans</label>
 			<select id="beanId" bind:value={beanId} required>
 				{#each inProgressBeans as bean}
-					<option value={bean.id}>{bean.bagName}</option>
+					<option value={bean.id}>{displayText(bean.bagName, bean.bagName)}</option>
 				{/each}
 			</select>
 		</div>
 
 		<div class="grid gap-4 md:grid-cols-2">
 			<div class="field">
-				<label for="waterTemp">Water temp (°F)</label>
+				<label for="waterTemp">Water Temp (°F)</label>
 				<input id="waterTemp" bind:value={waterTemp} inputmode="decimal" />
 			</div>
 			<div class="field">
-				<label for="grindSize">Grind size</label>
+				<label for="grindSize">Grind Size</label>
 				<input id="grindSize" bind:value={grindSize} />
 			</div>
 			<div class="field">
@@ -139,9 +140,7 @@
 				<Combobox id="dripper" bind:value={dripper} options={suggestions.drippers} />
 			</div>
 			<div class="field md:col-span-2">
-				<span class="text-xs font-semibold tracking-[0.04em] text-[var(--muted)] uppercase"
-					>Total time</span
-				>
+				<span class="text-sm font-semibold text-[var(--muted)]">Total Time</span>
 				<div class="mt-2 grid grid-cols-2 gap-3">
 					<div class="field">
 						<label for="minutes">Minutes</label>
@@ -176,7 +175,7 @@
 		{/if}
 
 		<button class="btn btn-primary btn-block btn-block-sm" type="submit" disabled={saving}>
-			{saving ? 'Saving…' : 'Save log'}
+			{saving ? 'Saving…' : 'Save Log'}
 		</button>
 	</form>
 {/if}

@@ -30,17 +30,17 @@
 			await onsave(draft.trim());
 			editing = false;
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Could not save notes';
+			error = err instanceof Error ? err.message : 'Could Not Save Notes';
 		}
 	}
 </script>
 
 <div class="mt-4">
 	<div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-		<p class="text-xs font-semibold tracking-[0.04em] text-[var(--muted)] uppercase">Notes</p>
+		<p class="text-sm font-semibold text-[var(--muted)]">Notes</p>
 		{#if !editing}
 			<button class="btn btn-ghost px-3 text-sm" type="button" onclick={startEdit}>
-				{notes ? 'Edit notes' : 'Add notes'}
+				{notes ? 'Edit Notes' : 'Add Notes'}
 			</button>
 		{/if}
 	</div>
@@ -54,16 +54,26 @@
 			<p class="mt-2 text-sm text-red-700" role="alert">{error}</p>
 		{/if}
 		<div class="mt-2 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
-			<button class="btn btn-primary btn-block btn-block-sm" type="button" disabled={saving} onclick={save}>
-				{saving ? 'Saving…' : 'Save notes'}
+			<button
+				class="btn btn-primary btn-block btn-block-sm"
+				type="button"
+				disabled={saving}
+				onclick={save}
+			>
+				{saving ? 'Saving…' : 'Save Notes'}
 			</button>
-			<button class="btn btn-ghost btn-block btn-block-sm" type="button" disabled={saving} onclick={cancel}>
+			<button
+				class="btn btn-ghost btn-block btn-block-sm"
+				type="button"
+				disabled={saving}
+				onclick={cancel}
+			>
 				Cancel
 			</button>
 		</div>
 	{:else if notes}
 		<p class="text-sm leading-relaxed break-words whitespace-pre-wrap text-[var(--ink)]">{notes}</p>
 	{:else}
-		<p class="text-sm text-[var(--muted)]">No notes yet.</p>
+		<p class="text-sm text-[var(--muted)]">No Notes Yet.</p>
 	{/if}
 </div>

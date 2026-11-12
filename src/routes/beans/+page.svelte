@@ -8,6 +8,7 @@
 	import RankModal from '#lib/components/RankModal.svelte';
 	import BeanForm from '#lib/components/BeanForm.svelte';
 	import SimilarPanel from '#lib/components/SimilarPanel.svelte';
+	import { displayText } from '#lib/text';
 	import type { Bean } from '#lib/types';
 	import type { PageProps } from './$types';
 
@@ -135,7 +136,7 @@
 	<div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
 		<div class="min-w-0">
 			<h1 class="display text-3xl font-bold">Bags</h1>
-			<p class="mt-1 text-[var(--muted)]">In progress and finished, kept separate.</p>
+			<p class="mt-1 text-[var(--muted)]">In Progress and Finished, Kept Separate.</p>
 		</div>
 		{#if !showAddBean}
 			<button
@@ -143,7 +144,7 @@
 				type="button"
 				onclick={openAddBean}
 			>
-				Add bean
+				Add Bean
 			</button>
 		{/if}
 	</div>
@@ -169,9 +170,9 @@
 
 	{#if inProgress.length === 0 && finished.length === 0 && !showAddBean}
 		<EmptyState
-			title="No bags yet"
-			body="Add your first bag to start logging pours against it."
-			cta="Add a bean"
+			title="No Bags Yet"
+			body="Add Your First Bag to Start Logging Pours Against It."
+			cta="Add a Bean"
 			onclick={openAddBean}
 		/>
 	{:else if inProgress.length > 0 || finished.length > 0}
@@ -183,16 +184,18 @@
 		</div>
 
 		{#if filteredInProgress.length === 0 && filteredFinished.length === 0}
-			<div class="panel p-6 text-[var(--muted)]">No bags match “{search.trim()}”.</div>
+			<div class="panel p-6 text-[var(--muted)]">
+				No Bags Match “{displayText(search.trim(), search.trim())}”.
+			</div>
 		{:else}
 			<div class="space-y-8">
 				<section>
-					<h2 class="display mb-3 text-2xl font-semibold">In progress</h2>
+					<h2 class="display mb-3 text-2xl font-semibold">In Progress</h2>
 					{#if filteredInProgress.length === 0}
 						<p class="text-sm text-[var(--muted)]">
 							{search.trim()
-								? 'No in-progress bags match this search.'
-								: 'Nothing brewing right now.'}
+								? 'No In-Progress Bags Match This Search.'
+								: 'Nothing Brewing Right Now.'}
 						</p>
 					{:else}
 						<div class="stagger grid gap-3">
@@ -200,13 +203,19 @@
 								<article class="panel p-5">
 									<div class="flex flex-wrap items-start justify-between gap-3">
 										<div class="min-w-0">
-											<h3 class="display text-xl font-semibold break-words">{bean.bagName}</h3>
+											<h3 class="display text-xl font-semibold break-words">
+												{displayText(bean.bagName, bean.bagName)}
+											</h3>
 											<p class="mt-1 text-sm break-words text-[var(--muted)]">
-												{bean.roaster} · {bean.country}
-												{#if bean.roastLevel} · {bean.roastLevel}{/if}
+												{displayText(bean.roaster, bean.roaster)} · {displayText(
+													bean.country,
+													bean.country
+												)}
+												{#if bean.roastLevel}
+													· {displayText(bean.roastLevel, bean.roastLevel)}{/if}
 											</p>
 										</div>
-										<span class="badge badge-progress">In progress</span>
+										<span class="badge badge-progress">In Progress</span>
 									</div>
 									<NotesEditor
 										notes={bean.notes}
@@ -214,8 +223,8 @@
 										onsave={(notes) => saveBeanNotes(bean.id, notes)}
 									/>
 									<div class="action-row mt-4">
-										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
-										<a class="btn btn-ghost" href={`/?beanId=${bean.id}&add=1`}>Log a brew</a>
+										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in Feed</a>
+										<a class="btn btn-ghost" href={`/?beanId=${bean.id}&add=1`}>Log a Brew</a>
 										<button
 											class="btn btn-ghost"
 											type="button"
@@ -228,14 +237,14 @@
 												);
 											}}
 										>
-											Find similar
+											Find Similar
 										</button>
 										<button
 											class="btn btn-ghost"
 											type="button"
 											onclick={() => (pendingFinish = bean)}
 										>
-											Mark finished
+											Mark Finished
 										</button>
 										<button
 											class="btn btn-ghost"
@@ -252,10 +261,12 @@
 				</section>
 
 				<section>
-					<h2 class="display mb-3 text-2xl font-semibold">Finished · by ranking</h2>
+					<h2 class="display mb-3 text-2xl font-semibold">Finished · by Ranking</h2>
 					{#if filteredFinished.length === 0}
 						<p class="text-sm text-[var(--muted)]">
-							{search.trim() ? 'No finished bags match this search.' : 'No finished bags yet.'}
+							{search.trim()
+								? 'No Finished Bags Match This Search.'
+								: 'No Finished Bags Yet.'}
 						</p>
 					{:else}
 						<div class="stagger grid gap-3">
@@ -263,10 +274,16 @@
 								<article class="panel p-5">
 									<div class="flex flex-wrap items-start justify-between gap-3">
 										<div class="min-w-0">
-											<h3 class="display text-xl font-semibold break-words">{bean.bagName}</h3>
+											<h3 class="display text-xl font-semibold break-words">
+												{displayText(bean.bagName, bean.bagName)}
+											</h3>
 											<p class="mt-1 text-sm break-words text-[var(--muted)]">
-												{bean.roaster} · {bean.country}
-												{#if bean.roastLevel} · {bean.roastLevel}{/if}
+												{displayText(bean.roaster, bean.roaster)} · {displayText(
+													bean.country,
+													bean.country
+												)}
+												{#if bean.roastLevel}
+													· {displayText(bean.roastLevel, bean.roastLevel)}{/if}
 											</p>
 										</div>
 										<span class="badge badge-finished">{bean.ranking ?? '—'}/10</span>
@@ -277,7 +294,7 @@
 										onsave={(notes) => saveBeanNotes(bean.id, notes)}
 									/>
 									<div class="action-row mt-4">
-										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
+										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in Feed</a>
 										<button
 											class="btn btn-ghost"
 											type="button"
@@ -290,7 +307,7 @@
 												);
 											}}
 										>
-											Find similar
+											Find Similar
 										</button>
 										<button
 											class="btn btn-ghost"
@@ -312,9 +329,9 @@
 
 <ConfirmModal
 	open={pendingDelete !== null}
-	title="Delete this bag?"
+	title="Delete This Bag?"
 	body={pendingDelete
-		? `“${pendingDelete.bagName}” and all of its brew logs will be removed. This can’t be undone.`
+		? `“${displayText(pendingDelete.bagName, pendingDelete.bagName)}” and All of Its Brew Logs Will Be Removed. This Can’t Be Undone.`
 		: ''}
 	busy={deleting}
 	oncancel={() => {

@@ -71,9 +71,9 @@
 <form class="panel space-y-4 p-5 md:p-6" onsubmit={submit}>
 	<div class="flex flex-wrap items-start justify-between gap-3">
 		<div>
-			<h2 class="display text-xl font-semibold">Add a bean</h2>
+			<h2 class="display text-xl font-semibold">Add a Bean</h2>
 			<p class="mt-1 text-sm text-[var(--muted)]">
-				Name and roaster are required. Country and everything else is optional.
+				Name and Roaster Are Required. Country and Everything Else Is Optional.
 			</p>
 		</div>
 		{#if oncancel}
@@ -83,17 +83,17 @@
 
 	<div class="grid gap-4 md:grid-cols-2">
 		<div class="field md:col-span-2">
-			<label for="bagName">Bag name *</label>
+			<label for="bagName">Bag Name *</label>
 			<input id="bagName" bind:value={bagName} required />
 		</div>
 		<div class="field">
-			<label for="country">Country of origin</label>
+			<label for="country">Country of Origin</label>
 			<Combobox id="country" bind:value={country} options={suggestions.countries} />
 		</div>
 		<div class="field">
 			<label for="region">Region</label>
 			<select id="region" bind:value={region}>
-				<option value="">Unknown / derive later</option>
+				<option value="">Unknown / Derive Later</option>
 				<option value="africa">Africa</option>
 				<option value="asia">Asia</option>
 				<option value="america">America</option>
@@ -109,7 +109,7 @@
 			<Combobox id="farm" bind:value={farm} options={suggestions.farms} />
 		</div>
 		<div class="field">
-			<label for="roastLevel">Roast level</label>
+			<label for="roastLevel">Roast Level</label>
 			<select id="roastLevel" bind:value={roastLevel}>
 				<option value="">Unknown</option>
 				<option value="light">Light</option>
@@ -135,7 +135,7 @@
 			/>
 		</div>
 		<div class="field">
-			<label for="beanSize">Bean size</label>
+			<label for="beanSize">Bean Size</label>
 			<select id="beanSize" bind:value={beanSize}>
 				<option value="">Unknown</option>
 				{#each BEAN_SIZES as size}
@@ -146,7 +146,7 @@
 		<div class="field">
 			<label for="status">Status</label>
 			<select id="status" bind:value={status}>
-				<option value="in_progress">In progress</option>
+				<option value="in_progress">In Progress</option>
 				<option value="finished">Finished</option>
 			</select>
 		</div>
@@ -176,6 +176,6 @@
 	{/if}
 
 	<button class="btn btn-primary btn-block btn-block-sm" type="submit" disabled={saving}>
-		{saving ? 'Saving…' : 'Save bean'}
+		{saving ? 'Saving…' : 'Save Bean'}
 	</button>
 </form>
