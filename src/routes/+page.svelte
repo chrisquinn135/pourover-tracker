@@ -6,6 +6,7 @@
 	import NotesEditor from '#lib/components/NotesEditor.svelte';
 	import ConfirmModal from '#lib/components/ConfirmModal.svelte';
 	import LogForm from '#lib/components/LogForm.svelte';
+	import PageToolbar from '#lib/components/PageToolbar.svelte';
 	import { displayText } from '#lib/text';
 	import type { PageProps } from './$types';
 
@@ -121,21 +122,11 @@
 </script>
 
 <section class="animate-rise">
-	<div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-		<div class="min-w-0">
-			<h1 class="display text-3xl font-bold">Feed</h1>
-			<p class="mt-1 text-[var(--muted)]">Every Pour, Newest First.</p>
-		</div>
-		{#if !showAddLog}
-			<button
-				class="btn btn-primary btn-block btn-block-sm"
-				type="button"
-				onclick={openAddLog}
-			>
-				Add Log
-			</button>
-		{/if}
-	</div>
+	<PageToolbar
+		actionLabel="Add Log"
+		showAction={!showAddLog}
+		onaction={openAddLog}
+	/>
 
 	<SampleBanner show={data.usingMockData} />
 

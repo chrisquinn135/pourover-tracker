@@ -8,6 +8,7 @@
 	import RankModal from '#lib/components/RankModal.svelte';
 	import BeanForm from '#lib/components/BeanForm.svelte';
 	import SimilarPanel from '#lib/components/SimilarPanel.svelte';
+	import PageToolbar from '#lib/components/PageToolbar.svelte';
 	import { displayText } from '#lib/text';
 	import type { Bean } from '#lib/types';
 	import type { PageProps } from './$types';
@@ -133,21 +134,11 @@
 </script>
 
 <section class="animate-rise">
-	<div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-		<div class="min-w-0">
-			<h1 class="display text-3xl font-bold">Bags</h1>
-			<p class="mt-1 text-[var(--muted)]">In Progress and Finished, Kept Separate.</p>
-		</div>
-		{#if !showAddBean}
-			<button
-				class="btn btn-primary btn-block btn-block-sm"
-				type="button"
-				onclick={openAddBean}
-			>
-				Add Bean
-			</button>
-		{/if}
-	</div>
+	<PageToolbar
+		actionLabel="Add Bean"
+		showAction={!showAddBean}
+		onaction={openAddBean}
+	/>
 
 	<SampleBanner show={data.usingMockData} />
 
