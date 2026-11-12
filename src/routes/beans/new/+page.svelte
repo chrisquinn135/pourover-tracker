@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
+	import Combobox from '#lib/components/Combobox.svelte';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import { BEAN_SIZES, beanFieldSuggestions } from '#lib/suggestions';
 	import type { PageProps } from './$types';
@@ -77,17 +78,7 @@
 			</div>
 			<div class="field">
 				<label for="country">Country of origin</label>
-				<input
-					id="country"
-					list="country-options"
-					bind:value={country}
-					autocomplete="off"
-				/>
-				<datalist id="country-options">
-					{#each suggestions.countries as option}
-						<option value={option}></option>
-					{/each}
-				</datalist>
+				<Combobox id="country" bind:value={country} options={suggestions.countries} />
 			</div>
 			<div class="field">
 				<label for="region">Region</label>
@@ -101,32 +92,16 @@
 			</div>
 			<div class="field">
 				<label for="roaster">Roaster *</label>
-				<input
+				<Combobox
 					id="roaster"
-					list="roaster-options"
 					bind:value={roaster}
+					options={suggestions.roasters}
 					required
-					autocomplete="off"
 				/>
-				<datalist id="roaster-options">
-					{#each suggestions.roasters as option}
-						<option value={option}></option>
-					{/each}
-				</datalist>
 			</div>
 			<div class="field">
 				<label for="farm">Farm</label>
-				<input
-					id="farm"
-					list="farm-options"
-					bind:value={farm}
-					autocomplete="off"
-				/>
-				<datalist id="farm-options">
-					{#each suggestions.farms as option}
-						<option value={option}></option>
-					{/each}
-				</datalist>
+				<Combobox id="farm" bind:value={farm} options={suggestions.farms} />
 			</div>
 			<div class="field">
 				<label for="roastLevel">Roast level</label>
@@ -139,45 +114,20 @@
 			</div>
 			<div class="field">
 				<label for="process">Process</label>
-				<input
-					id="process"
-					list="process-options"
-					bind:value={process}
-					autocomplete="off"
-				/>
-				<datalist id="process-options">
-					{#each suggestions.processes as option}
-						<option value={option}></option>
-					{/each}
-				</datalist>
+				<Combobox id="process" bind:value={process} options={suggestions.processes} />
 			</div>
 			<div class="field">
 				<label for="variety">Variety</label>
-				<input
-					id="variety"
-					list="variety-options"
-					bind:value={variety}
-					autocomplete="off"
-				/>
-				<datalist id="variety-options">
-					{#each suggestions.varieties as option}
-						<option value={option}></option>
-					{/each}
-				</datalist>
+				<Combobox id="variety" bind:value={variety} options={suggestions.varieties} />
 			</div>
 			<div class="field">
 				<label for="altitude">Altitude (m)</label>
-				<input
+				<Combobox
 					id="altitude"
-					list="altitude-options"
 					bind:value={altitude}
-					autocomplete="off"
+					options={suggestions.altitudes}
+					inputmode="decimal"
 				/>
-				<datalist id="altitude-options">
-					{#each suggestions.altitudes as option}
-						<option value={option}></option>
-					{/each}
-				</datalist>
 			</div>
 			<div class="field">
 				<label for="beanSize">Bean size</label>

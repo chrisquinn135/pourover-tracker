@@ -22,7 +22,7 @@ html,
 body {
 	min-height: 100%;
 	max-width: 100%;
-	overflow-x: hidden;
+	overflow-x: clip;
 }
 
 body {
@@ -135,6 +135,13 @@ a {
 	transition:
 		border-color 0.2s ease,
 		box-shadow 0.2s ease;
+}
+
+/* Keep native mobile pickers usable with @tailwindcss/forms */
+.field select {
+	appearance: auto;
+	background-image: none;
+	padding-right: 2rem;
 }
 
 .field input:focus,

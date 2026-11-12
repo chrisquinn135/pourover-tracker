@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
+	import Combobox from '#lib/components/Combobox.svelte';
 	import SampleBanner from '#lib/components/SampleBanner.svelte';
 	import { formatTotalTime, logFieldSuggestions } from '#lib/suggestions';
 	import type { PageProps } from './$types';
@@ -111,31 +112,11 @@
 				</div>
 				<div class="field">
 					<label for="grinder">Grinder</label>
-					<input
-						id="grinder"
-						list="grinder-options"
-						bind:value={grinder}
-						autocomplete="off"
-					/>
-					<datalist id="grinder-options">
-						{#each suggestions.grinders as option}
-							<option value={option}></option>
-						{/each}
-					</datalist>
+					<Combobox id="grinder" bind:value={grinder} options={suggestions.grinders} />
 				</div>
 				<div class="field">
 					<label for="dripper">Dripper</label>
-					<input
-						id="dripper"
-						list="dripper-options"
-						bind:value={dripper}
-						autocomplete="off"
-					/>
-					<datalist id="dripper-options">
-						{#each suggestions.drippers as option}
-							<option value={option}></option>
-						{/each}
-					</datalist>
+					<Combobox id="dripper" bind:value={dripper} options={suggestions.drippers} />
 				</div>
 				<div class="field md:col-span-2">
 					<span class="text-xs font-semibold tracking-[0.04em] text-[var(--muted)] uppercase"
