@@ -5,8 +5,7 @@ Personal pourover brew tracker built with **SvelteKit**. Bean bags and brew logs
 ## Features
 
 - **Feed** (home) — pours newest first, filter by bag, **Add log** opens the form on the same page
-- **Bags** — in-progress and finished lists (finished sorted by ranking), **Add bean** opens the form on the same page
-- **Closest** — weighted similarity for a starting recipe
+- **Bags** — in-progress and finished lists (finished sorted by ranking), **Add bean** and **Find similar** on the same page
 
 ### Closest-bean scoring
 

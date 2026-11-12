@@ -3,8 +3,7 @@
 
 	const links = [
 		{ href: '/', label: 'Feed' },
-		{ href: '/beans', label: 'Bags' },
-		{ href: '/closest', label: 'Closest' }
+		{ href: '/beans', label: 'Bags' }
 	];
 </script>
 
@@ -16,7 +15,7 @@
 		Pourover tracker
 	</a>
 
-	<nav class="grid w-full min-w-0 grid-cols-3 gap-2" aria-label="Primary">
+	<nav class="grid w-full min-w-0 grid-cols-2 gap-2" aria-label="Primary">
 		{#each links as link}
 			{@const active =
 				link.href === '/'

@@ -7,6 +7,7 @@
 	import ConfirmModal from '#lib/components/ConfirmModal.svelte';
 	import RankModal from '#lib/components/RankModal.svelte';
 	import BeanForm from '#lib/components/BeanForm.svelte';
+	import SimilarPanel from '#lib/components/SimilarPanel.svelte';
 	import type { Bean } from '#lib/types';
 	import type { PageProps } from './$types';
 
@@ -17,6 +18,7 @@
 	let pendingFinish = $state<Bean | null>(null);
 	let finishing = $state(false);
 	let search = $state('');
+	let similarFor = $state<Bean | null>(null);
 	let showAddBean = $state(page.url.searchParams.get('add') === '1');
 	let syncedAdd = $state(page.url.searchParams.get('add') === '1');
 
@@ -154,6 +156,17 @@
 		</div>
 	{/if}
 
+	{#if similarFor}
+		{#key similarFor.id}
+			<SimilarPanel
+				bean={similarFor}
+				onclose={() => {
+					similarFor = null;
+				}}
+			/>
+		{/key}
+	{/if}
+
 	{#if inProgress.length === 0 && finished.length === 0 && !showAddBean}
 		<EmptyState
 			title="No bags yet"
@@ -206,6 +219,20 @@
 										<button
 											class="btn btn-ghost"
 											type="button"
+											onclick={() => {
+												similarFor = bean;
+												queueMicrotask(() =>
+													document
+														.getElementById('similar')
+														?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+												);
+											}}
+										>
+											Find similar
+										</button>
+										<button
+											class="btn btn-ghost"
+											type="button"
 											onclick={() => (pendingFinish = bean)}
 										>
 											Mark finished
@@ -251,6 +278,20 @@
 									/>
 									<div class="action-row mt-4">
 										<a class="btn btn-ghost" href={`/?beanId=${bean.id}`}>View in feed</a>
+										<button
+											class="btn btn-ghost"
+											type="button"
+											onclick={() => {
+												similarFor = bean;
+												queueMicrotask(() =>
+													document
+														.getElementById('similar')
+														?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+												);
+											}}
+										>
+											Find similar
+										</button>
 										<button
 											class="btn btn-ghost"
 											type="button"
