@@ -134,7 +134,12 @@
 <section class="animate-rise">
 	<div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
 		<div class="min-w-0">
-			<h1 class="display text-3xl font-bold">Bags</h1>
+			<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+				<h1 class="display text-3xl font-bold">Bags</h1>
+				<a class="text-sm font-medium text-[var(--accent)]" href="/" data-sveltekit-preload-data="hover"
+					>Feed</a
+				>
+			</div>
 			<p class="mt-1 text-[var(--muted)]">In progress and finished, kept separate.</p>
 		</div>
 		{#if !showAddBean}

@@ -122,7 +122,12 @@
 <section class="animate-rise">
 	<div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
 		<div class="min-w-0">
-			<h1 class="display text-3xl font-bold">Feed</h1>
+			<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+				<h1 class="display text-3xl font-bold">Feed</h1>
+				<a class="text-sm font-medium text-[var(--accent)]" href="/beans" data-sveltekit-preload-data="hover"
+					>Bags</a
+				>
+			</div>
 			<p class="mt-1 text-[var(--muted)]">Every pour, newest first.</p>
 		</div>
 		{#if !showAddLog}
